@@ -77,3 +77,74 @@ Create `taskforge/services.py` with a `TaskService` class that implements:
 - Initialize the in-memory store inside `__init__`:
   ```python
   self._tasks: dict[UUID, Task] = {}
+
+
+Here’s the ready-to-paste content for your README:
+
+```markdown
+## Step 3 — First Real Async (Controlled Concurrency)
+
+### Goal
+Add the ability to process multiple tasks concurrently while limiting the number of tasks that run at the same time.
+
+### Concrete Task
+Add this method to `TaskService`:
+
+```python
+async def process_tasks(
+    self,
+    task_ids: list[UUID],
+    max_concurrent: int = 3,
+) -> list[Task]:
+```
+
+### Requirements
+- Limit concurrency with `asyncio.Semaphore`
+- For each task:
+  1. Call `start_task`
+  2. Simulate work with `await asyncio.sleep(...)`
+  3. Call `complete_task`
+- Use `asyncio.gather` (or `TaskGroup`) to run the tasks concurrently
+- Decide on an error strategy (fail-fast or continue-on-error) and document it
+
+### Key Concepts Learned
+
+**`asyncio.Semaphore`**  
+A concurrency primitive that limits how many coroutines can run a critical section at the same time.
+
+**`asyncio.gather`**  
+Runs multiple awaitables concurrently and collects their results.  
+By default it fails fast; use `return_exceptions=True` if you want to continue on errors.
+
+**Structured concurrency**  
+Prefer patterns that make the lifetime of tasks clear and avoid “fire-and-forget” tasks that can be silently lost.
+
+### Common Mistakes & Corrections
+
+| Mistake | Why it was a problem | Correct approach |
+|---------|----------------------|------------------|
+| Wrong method/parameter names (`process_task`, `task_id`) | Confusing and error-prone | Use clear plural names: `process_tasks` + `task_ids` |
+| Variable shadowing | Hard to read and easy to introduce bugs | Use different names for the list and the loop variable |
+| Missing explicit error strategy | Unclear behavior on failure | Document whether you fail-fast or continue |
+
+---
+
+## Step 4 — Manual Test of the Async Method
+
+### Goal
+Verify that the concurrent processing works correctly before moving to FastAPI.
+
+### Concrete Task
+Create a temporary script (`test_async.py`) that:
+
+1. Instantiates `TaskService`
+2. Creates 6–10 tasks
+3. Calls `await service.process_tasks(..., max_concurrent=3)`
+4. Prints the results (id, status, timestamps, duration)
+
+### What We Observed
+- The first 3 tasks started at almost the same timestamp → semaphore correctly limited concurrency.
+- As tasks finished, new ones started.
+- All tasks reached `DONE` status successfully.
+
+This confirmed that both the state transitions and the concurrency control are working.
