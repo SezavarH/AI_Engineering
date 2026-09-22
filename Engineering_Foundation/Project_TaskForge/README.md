@@ -1,4 +1,6 @@
-## Step 1 — Domain Models  
+# TaskForge — Step-by-Step README
+
+## Step 1 — Domain Models
 *(Typing + Pydantic + Clean OOP Foundations)*
 
 ### Goal
@@ -11,7 +13,7 @@ Create `taskforge/models.py` containing:
 - `Project` (id, name, owner_id, created_at)
 - `Task` (id, project_id, title, description, status, priority, assignee_id, created_at, started_at, completed_at)
 
-Requirements:
+### Requirements
 - Use `UUID` for all identifiers
 - Use timezone-aware `datetime` for all timestamps
 - Use `Enum` for `TaskStatus` and `TaskPriority`
@@ -32,7 +34,7 @@ Useful for derived/computed values that belong to the object.
 
 **Pydantic `model_validator(mode="after")`**  
 Runs after the model has been fully constructed.  
-Perfect for cross-field validation rules (e.g. “if status is DONE then completed_at must exist”).
+Perfect for cross-field validation rules (e.g. "if status is DONE then completed_at must exist").
 
 **UUID vs int for IDs**  
 UUIDs are preferred for public-facing identifiers because they are collision-resistant and safer when systems grow or data is merged.
@@ -40,7 +42,7 @@ UUIDs are preferred for public-facing identifiers because they are collision-res
 **Foreign keys must not have defaults**  
 `owner_id` and `project_id` reference existing objects. Giving them `default_factory=uuid.uuid4` would silently create random unrelated IDs.
 
-### Common Mistakes & Corrections  
+### Common Mistakes & Corrections
 
 | Mistake | Why it was a problem | Correct approach |
 |---------|----------------------|------------------|
@@ -49,13 +51,15 @@ UUIDs are preferred for public-facing identifiers because they are collision-res
 | Gave foreign keys default UUIDs | Creates invalid relationships | Foreign keys are required, no default |
 | Forgot defaults on some `created_at` fields | Inconsistent object creation | Always provide `Field(default_factory=...)` |
 | Used old Pydantic v1 validator style | Does not work in Pydantic v2 | Use `@model_validator(mode="after")` |
-| Didn’t know `@property` | Couldn’t add domain behavior | Learn that `@property` makes methods look like attributes |
+| Didn't know `@property` | Couldn't add domain behavior | Learn that `@property` makes methods look like attributes |
 
 ### Final Design Decisions
 - All models are Pydantic `BaseModel` (we will later introduce a clearer separation between domain objects and API schemas if needed)
 - Status and priority are strict Enums
 - Domain rules live inside the model (not in the service layer)
 - Models remain pure (no I/O, no framework dependencies)
+
+---
 
 ## Step 2 — Service Layer (Clean OOP)
 
@@ -77,11 +81,10 @@ Create `taskforge/services.py` with a `TaskService` class that implements:
 - Initialize the in-memory store inside `__init__`:
   ```python
   self._tasks: dict[UUID, Task] = {}
+  ```
 
+---
 
-Here’s the ready-to-paste content for your README:
-
-```markdown
 ## Step 3 — First Real Async (Controlled Concurrency)
 
 ### Goal
@@ -117,7 +120,7 @@ Runs multiple awaitables concurrently and collects their results.
 By default it fails fast; use `return_exceptions=True` if you want to continue on errors.
 
 **Structured concurrency**  
-Prefer patterns that make the lifetime of tasks clear and avoid “fire-and-forget” tasks that can be silently lost.
+Prefer patterns that make the lifetime of tasks clear and avoid "fire-and-forget" tasks that can be silently lost.
 
 ### Common Mistakes & Corrections
 
@@ -148,3 +151,54 @@ Create a temporary script (`test_async.py`) that:
 - All tasks reached `DONE` status successfully.
 
 This confirmed that both the state transitions and the concurrency control are working.
+
+---
+
+## Step 5 — FastAPI Basics (Endpoints + Dependency Injection)
+
+### Goal
+Expose the domain and service layers over HTTP using FastAPI, with dependency injection providing the `TaskService` instance.
+
+### Concrete Task
+Create `taskforge/main.py` with:
+
+- A FastAPI application
+- Dependency injection to provide the `TaskService`
+- A request schema (`TaskCreate`) — placed in `models.py` or a new `schemas.py`
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/tasks` | Create a new task |
+| `GET` | `/tasks/{task_id}` | Get a single task |
+| `GET` | `/tasks` | List tasks (optional `project_id` query param) |
+| `POST` | `/tasks/{task_id}/start` | Start a task |
+| `POST` | `/tasks/{task_id}/complete` | Complete a task |
+
+### Requirements
+- Return proper HTTP status codes:
+  - `201` on creation
+  - `404` when a task is not found
+  - `400` for invalid state transitions
+
+### Key Concepts Learned
+
+**Dependency Injection with `Depends`**  
+FastAPI's `Depends` lets you declare what a route needs (e.g. a `TaskService`) without instantiating it inside the route. This keeps handlers thin and makes testing easier.
+
+**Request schemas vs domain models**  
+`TaskCreate` describes what the client is allowed to send. It is intentionally narrower than the full `Task` domain model, which includes server-generated fields like `id`, `created_at`, and `status`.
+
+**HTTP status codes as domain signals**  
+Mapping domain outcomes to status codes (`404` for not found, `400` for invalid transitions) keeps the API predictable and RESTful.
+
+### Common Mistakes & Corrections
+
+| Mistake | Why it was a problem | Correct approach |
+|---------|----------------------|------------------|
+| Instantiating `TaskService` inside each route | Loses shared state; no single in-memory store | Use `Depends` with a module-level singleton or `lru_cache` provider |
+| Reusing the domain `Task` model as the request body | Clients could set `id`, `created_at`, `status` | Create a dedicated `TaskCreate` schema |
+| Returning raw exceptions instead of HTTP errors | Leaks internals; inconsistent responses | Raise `HTTPException` with appropriate status codes |
+| Forgetting `201` for creation | Defaults to `200`, misleading clients | Pass `status_code=201` to the route decorator |
+| Not validating `project_id` query param type | Accepts garbage input | Type it as `UUID | None` in the route signature |
