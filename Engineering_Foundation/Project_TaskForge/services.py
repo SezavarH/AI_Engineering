@@ -2,7 +2,7 @@ from uuid import UUID
 from typing import Optional
 from datetime import datetime, timezone
 
-from .models import Task, TaskPriority, TaskStatus
+from models import Task, TaskPriority, TaskStatus
 import asyncio
 import random
 
