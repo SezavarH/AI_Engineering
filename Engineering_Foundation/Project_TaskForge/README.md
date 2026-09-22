@@ -40,7 +40,7 @@ UUIDs are preferred for public-facing identifiers because they are collision-res
 **Foreign keys must not have defaults**  
 `owner_id` and `project_id` reference existing objects. Giving them `default_factory=uuid.uuid4` would silently create random unrelated IDs.
 
-### Common Mistakes & Corrections (from our session)
+### Common Mistakes & Corrections  
 
 | Mistake | Why it was a problem | Correct approach |
 |---------|----------------------|------------------|
@@ -56,3 +56,24 @@ UUIDs are preferred for public-facing identifiers because they are collision-res
 - Status and priority are strict Enums
 - Domain rules live inside the model (not in the service layer)
 - Models remain pure (no I/O, no framework dependencies)
+
+## Step 2 — Service Layer (Clean OOP)
+
+### Goal
+Create a clean service layer that owns the business logic and currently uses an in-memory store.  
+This layer will later talk to a real repository and contain the async concurrency patterns.
+
+### Concrete Task
+Create `taskforge/services.py` with a `TaskService` class that implements:
+
+- `create_task(...)`
+- `get_task(...)`
+- `list_tasks(...)`
+- `start_task(...)`
+- `complete_task(...)`
+
+### Requirements
+- Use a normal Python class (not a Pydantic model or dataclass)
+- Initialize the in-memory store inside `__init__`:
+  ```python
+  self._tasks: dict[UUID, Task] = {}
