@@ -100,13 +100,6 @@ async def check_url(
 **Why `asyncio.wait_for`?**
 It cancels the request if it takes too long. `httpx.Timeout` also works, but `wait_for` is a hard guarantee at the asyncio level.
 
-```python
-resp = await asyncio.wait_for(   # wrap with hard timeout
-    client.get(url),
-    timeout=timeout,
-)
-```
-
 **Why `httpx.HTTPError`?**
 That's the base exception class for httpx. DNS failure, connection refused, invalid URL, protocol errors — all inherit from it. So one `except` catches them all.
 
@@ -273,7 +266,281 @@ That `loc` (`["body", "urls", 0]`) tells you *exactly* which item failed. That's
 
 ## Step 3 — Add SSE Streaming Progress Endpoint
 
-Coming next: reuse `check_url` but yield each result as it finishes, over Server-Sent Events.
+### Concepts
+
+**What is SSE (Server-Sent Events)?**
+A one-way streaming protocol over plain HTTP. The server keeps the connection open and pushes text chunks to the client. Each chunk is an **event**:
+
+```
+event: start
+data: {"count": 3}
+
+data: {"url": "https://example.com/", "ok": true, "status": 200, "error": null}
+
+event: done
+data: {}
+
+```
+
+**Rules of the format:**
+- Each line is `field: value`.
+- A **blank line** (`\n\n`) ends one event.
+- `data:` is the payload; `event:` optionally names the event type.
+- It's just text — `Content-Type: text/event-stream` is the only magic.
+
+**What is an async generator?**
+A function with `yield` instead of `return`, declared `async def`. It produces values **one at a time**, pausing between them. FastAPI's `StreamingResponse` consumes it, forwarding each yielded string to the client.
+
+```python
+async def event_stream():
+    yield "data: hello\n\n"
+    yield "data: world\n\n"
+```
+
+**What is `asyncio.TaskGroup`?**
+A modern (Python 3.11+) context manager that runs a set of tasks together and guarantees cleanup:
+
+```python
+async with asyncio.TaskGroup() as tg:
+    tg.create_task(worker(...))
+    tg.create_task(worker(...))
+# <- all tasks are done here
+```
+
+If any task raises, the rest are cancelled. If the block exits normally, every task has completed.
+
+**What is `asyncio.Queue`?**
+An async FIFO. Producers `await q.put(item)`; consumers `await q.get()`. Perfect for "workers push results, the generator pulls them out".
+
+### The Pattern: Workers + Queue + TaskGroup
+
+The generator needs to do two things **at the same time**:
+1. Run N worker tasks (each calls `check_url`).
+2. Yield results as they arrive.
+
+The trick: spawn the workers inside a `TaskGroup`, have each push its result into a queue, and have the generator pull from the queue in a loop.
+
+```python
+async def check_many_stream(urls, concurrency=5, per_url_timeout=2.0):
+    semaphore = asyncio.Semaphore(concurrency)
+    queue: asyncio.Queue[dict] = asyncio.Queue()
+
+    async def worker(client, url):
+        result = await check_url(client, url, semaphore, per_url_timeout)
+        await queue.put(result)          # push, don't return
+
+    async with httpx.AsyncClient() as client:
+        async with asyncio.TaskGroup() as tg:
+            for url in urls:
+                tg.create_task(worker(client, url))
+
+            # Pull exactly len(urls) results out, yielding each.
+            for _ in range(len(urls)):
+                yield await queue.get()
+        # TaskGroup waits here for all workers to finish.
+```
+
+**Why exactly `len(urls)` pulls?** Because we know how many results to expect. After that many, the loop ends, the `TaskGroup` block exits cleanly, and the generator returns.
+
+**Why is yielding inside the `async with` OK?** The `TaskGroup` context stays open while we yield, keeping the workers alive.
+
+**Ordering:** `queue.get()` returns results in completion order, not input order. That's the point of streaming — you want the fast ones first.
+
+### The Generator Function (for `async_core.py`)
+
+```python
+async def check_many_stream(
+    urls: list[str],
+    concurrency: int = 5,
+    per_url_timeout: float = 2.0,
+):
+    """
+    Async generator yielding result dicts as they complete.
+    Must yield every result exactly once, then finish.
+    """
+    semaphore = asyncio.Semaphore(concurrency)
+    queue: asyncio.Queue[dict] = asyncio.Queue()
+
+    async def worker(client: httpx.AsyncClient, url: str) -> None:
+        result = await check_url(client, url, semaphore, per_url_timeout)
+        await queue.put(result)
+
+    async with httpx.AsyncClient() as client:
+        async with asyncio.TaskGroup() as tg:
+            for url in urls:
+                tg.create_task(worker(client, url))
+
+            for _ in range(len(urls)):
+                yield await queue.get()
+```
+
+Key points, matching the requirements:
+- ✅ **Shared `AsyncClient`** — one instance, used by all workers.
+- ✅ **Reuses `check_url`** — no HTTP logic duplicated here.
+- ✅ **`TaskGroup`** — one task per URL, joined on exit.
+- ✅ **`asyncio.Queue`** — workers push, generator pulls.
+- ✅ **Yields while tasks run** — first yield happens as soon as the first URL completes.
+- ✅ **No blocking calls** — only `await` on async primitives.
+
+### The Endpoint (for `app.py`)
+
+Add imports:
+
+```python
+from fastapi.responses import StreamingResponse
+import json
+
+from async_core import check_many, check_many_stream
+```
+
+Then:
+
+```python
+@app.post("/check/stream")
+async def check_urls_stream(
+    payload: CheckRequest,
+    config: CheckerConfig = Depends(get_checker_config),
+):
+    urls = [str(u) for u in payload.urls]
+
+    async def event_stream():
+        yield f'event: start\ndata: {{"count": {len(urls)}}}\n\n'
+
+        async for result in check_many_stream(
+            urls,
+            concurrency=config.concurrency,
+            per_url_timeout=config.per_url_timeout,
+        ):
+            yield f"data: {json.dumps(result)}\n\n"
+
+        yield 'event: done\ndata: {}\n\n'
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+```
+
+**Notes:**
+- `StreamingResponse(gen, media_type="text/event-stream")` — the only thing that makes this SSE from FastAPI's side.
+- The dependency `config` is unchanged — same DI pattern as `/check`.
+- `json.dumps(result)` — the dict from `check_url` serializes to a one-line JSON object.
+- The `start` / `done` named events let the client distinguish "connection opened" from "actual result" from "stream finished".
+
+### ⚠️ Common Bug: Missing Type Annotation
+
+This will **not** work:
+
+```python
+@app.post("/check/stream")
+async def check_urls_stream(payload, config=Depends(get_checker_config)):
+    ...
+```
+
+Without `: CheckRequest`, FastAPI treats `payload` as a **query parameter**, not a JSON body. Swagger will show it in the URL as `?payload=...`, and your requests will fail with **422 Unprocessable Entity**.
+
+**Fix:** always annotate Pydantic model parameters.
+
+```python
+async def check_urls_stream(
+    payload: CheckRequest,          # <-- THIS
+    config: CheckerConfig = Depends(get_checker_config),
+):
+```
+
+After the fix, reload `/docs`: the `payload` query field disappears and a JSON body editor appears instead.
+
+### Testing SSE
+
+**Swagger `/docs` cannot show live streaming.** Swagger buffers the entire response and displays it all at once. It's still useful to:
+
+- Confirm the endpoint exists.
+- Confirm request body validation (422 on bad input).
+- See the **final** accumulated SSE text.
+
+**To see actual streaming, use `curl -N`:**
+
+```bash
+curl -N -X POST http://127.0.0.1:8000/check/stream \
+  -H "Content-Type: application/json" \
+  -d '{"urls": ["https://example.com", "https://httpbin.org/delay/3", "https://httpbin.org/status/404"]}'
+```
+
+- `-N` disables curl's own buffering — without it, curl also waits for everything before printing.
+- Watch the events appear **one at a time**, in completion order (fast URLs first, slow URLs last).
+
+Expected flow:
+
+```
+(t=0.0s)  event: start
+          data: {"count": 3}
+
+(t=0.3s)  data: {"url": "https://example.com/", "ok": true, "status": 200, "error": null}
+
+(t=0.4s)  data: {"url": "https://httpbin.org/status/404", "ok": false, "status": 404, "error": null}
+
+(t=3.0s)  data: {"url": "https://httpbin.org/delay/3", "ok": false, "status": null, "error": "timeout"}
+
+(t=3.0s)  event: done
+          data: {}
+```
+
+**Browser test (optional):** save as `test_sse.html` and open in a browser.
+
+```html
+<!DOCTYPE html>
+<html>
+<body>
+  <button onclick="start()">Start streaming</button>
+  <pre id="out"></pre>
+  <script>
+    async function start() {
+      const out = document.getElementById("out");
+      out.textContent = "";
+      const res = await fetch("http://127.0.0.1:8000/check/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          urls: ["https://example.com", "https://httpbin.org/delay/3"]
+        })
+      });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        out.textContent += decoder.decode(value);
+      }
+    }
+  </script>
+</body>
+</html>
+```
+
+If the browser blocks the request with a CORS error, temporarily add CORS to `app.py` (learning only):
+
+```python
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(CORSMiddleware, allow_origins=["*"],
+                   allow_methods=["*"], allow_headers=["*"])
+```
+
+### Mental Model Cheat Sheet
+
+| Piece | What it does |
+|---|---|
+| `text/event-stream` | The media type that makes it SSE. |
+| `data: ...\n\n` | One event; blank line terminates it. |
+| `event: name` | Optional named event for the client to distinguish. |
+| `StreamingResponse(gen, ...)` | FastAPI wrapper that consumes an async generator and streams it. |
+| `async def ... yield` | Async generator — produces values lazily, pausable. |
+| `asyncio.TaskGroup` | Spawns tasks, joins them all on exit, cancels siblings on error. |
+| `asyncio.Queue` | Producer/consumer handoff; `put` / `get` are async. |
+
+### Exercises
+
+1. **Watch the timing.** Add a `print(time.monotonic(), result["url"])` right before `yield`. Run with a mix of fast and slow URLs. Confirm results come out in completion order.
+2. **Browser client.** Use `test_sse.html` above; watch chunks appear incrementally.
+3. **What if a worker crashes?** Temporarily replace `check_url(...)` with `raise RuntimeError("boom")` inside `worker`. Does the client see an error? Does the stream close? *(Hint: `TaskGroup` propagates the exception, closing the stream.)*
+4. **Why is yielding inside the `TaskGroup` block safe?** Explain in your own words.
+5. **Add a progress event.** Every time you yield a result, also yield `event: progress\ndata: {"done": N, "total": M}\n\n`.
 
 ---
 
