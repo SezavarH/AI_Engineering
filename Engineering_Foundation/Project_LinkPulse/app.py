@@ -1,10 +1,8 @@
 from dataclasses import dataclass
-
+import os
 from fastapi import Depends, FastAPI
 from fastapi.responses import StreamingResponse
-
 from pydantic import BaseModel, Field, HttpUrl
-
 from async_core import check_many, check_many_stream
 import json
 
@@ -31,7 +29,8 @@ class CheckUrlsDependency:
     per_url_timeout: float = 2.0
 
 def get_checker_config() -> CheckUrlsDependency:
-    return CheckUrlsDependency()
+    return CheckUrlsDependency(concurrency=int(os.getenv("LINKPULSE_CONCURRENCY", "5")),
+        per_url_timeout=float(os.getenv("LINKPULSE_TIMEOUT", "2.0")),)
 
 
 # --------- Routes (endpoints) ----------
