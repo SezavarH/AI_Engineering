@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      LINKPULSE_CONCURRENCY: "5"
+      LINKPULSE_TIMEOUT: "2.0"
