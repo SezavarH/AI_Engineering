@@ -544,9 +544,192 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"],
 
 ---
 
-## Step 4 — Dockerize + Docker Compose
+# Step 4 — Docker + Docker Compose
 
-Coming next.
+**Goal:** make the app runnable anywhere with:
+
+```bash
+docker compose up --build
+```
+
+---
+
+## Concepts
+
+**Image vs container.** An image is a frozen filesystem + runtime recipe. A container is a running instance of that image. Build once, run many.
+
+**Dockerfile.** A recipe to build an image. Read top to bottom; each `RUN`, `COPY`, `FROM` produces a layer.
+
+**Multi-stage build.** Two `FROM` statements. Stage 1 (builder) installs dependencies into wheels. Stage 2 (final) copies only the wheels — no pip, no compilers, no cache. Keeps the final image small.
+
+**`.dockerignore`.** Like `.gitignore` but for Docker. Prevents sending `.venv`, `__pycache__`, etc. into the image.
+
+**Compose.** A YAML file describing what to run. `docker compose up` reads it and starts the services. Convenience for local dev, not production orchestration.
+
+---
+
+## Step 1 — Pin Dependencies
+
+With the venv active:
+
+```bash
+pip freeze > requirements.txt
+```
+
+Pins every installed package and version so the Docker build installs exactly what you tested with.
+
+---
+
+## Step 2 — Environment-Driven Config
+
+Update `get_checker_config` in `app.py` so the container can be configured without rebuilding:
+
+```python
+import os
+
+@dataclass(frozen=True)
+class CheckUrlsDependency:
+    concurrency: int = 5
+    per_url_timeout: float = 2.0
+
+
+def get_checker_config() -> CheckUrlsDependency:
+    return CheckUrlsDependency(
+        concurrency=int(os.getenv("LINKPULSE_CONCURRENCY", "5")),
+        per_url_timeout=float(os.getenv("LINKPULSE_TIMEOUT", "2.0")),
+    )
+```
+
+Now the same image runs with different settings — change the env vars at run time.
+
+---
+
+## Step 3 — Dockerfile
+
+Create a file named `Dockerfile` (no extension):
+
+```dockerfile
+# ---------- Stage 1: build wheels ----------
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+
+
+# ---------- Stage 2: final runtime ----------
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+COPY --from=builder /wheels /wheels
+COPY requirements.txt .
+RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
+    && rm -rf /wheels
+
+RUN useradd --system --uid 10001 appuser
+
+COPY app.py async_core.py ./
+
+USER appuser
+EXPOSE 8000
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+**Why these details matter:**
+
+| Line | Reason |
+|---|---|
+| `AS builder` | Names the stage so a later `COPY --from=builder` can reference it. |
+| `pip wheel ... /wheels` | Downloads and builds all dependencies into `.whl` files. |
+| Second `FROM python:3.12-slim` | Starts a **fresh** image; nothing from stage 1 carries over unless copied. |
+| `PYTHONUNBUFFERED=1` | Logs appear immediately in `docker logs`. |
+| `PYTHONDONTWRITEBYTECODE=1` | No `.pyc` files inside the container. |
+| `COPY --from=builder /wheels /wheels` | Brings only the wheels across. |
+| `pip install --no-index --find-links=/wheels` | Installs from local wheels only — never hits PyPI. |
+| `useradd ... appuser` + `USER appuser` | Container never runs as root. |
+| `COPY app.py async_core.py ./` | Only the code we need. |
+| `CMD [... "--host", "0.0.0.0" ...]` | Required — otherwise uvicorn binds to localhost inside the container and is unreachable from the host. |
+
+**Why deps are copied before code:** Docker caches each layer. If only `app.py` changes, the deps layer stays cached, so rebuilds take seconds instead of minutes. Copy `requirements.txt` first, install, then copy code last.
+
+---
+
+## Step 4 — `.dockerignore`
+
+Create `.dockerignore` next to the Dockerfile:
+
+```
+.venv
+__pycache__
+*.pyc
+.git
+*.md
+.env
+```
+
+Keeps the build context small and prevents leaking local files.
+
+---
+
+## Step 5 — `docker-compose.yml`
+
+Create `docker-compose.yml`:
+
+```yaml
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      LINKPULSE_CONCURRENCY: "5"
+      LINKPULSE_TIMEOUT: "2.0"
+```
+
+| Line | Meaning |
+|---|---|
+| `services:` | Top-level key; one service called `app`. |
+| `build: .` | Build the image from the current directory. |
+| `ports: "8000:8000"` | Map host port 8000 → container port 8000. |
+| `environment:` | Env vars passed into the container — these feed `os.getenv` in `get_checker_config`. |
+
+Run:
+
+```bash
+docker compose up --build
+```
+
+Open **http://127.0.0.1:8000/docs**. Stop with `Ctrl+C` or `docker compose down` in another terminal.
+
+---
+
+## Mental Model Cheat Sheet
+
+| Piece | What it does |
+|---|---|
+| `FROM` | Base image for a stage. |
+| `WORKDIR` | Sets the working directory. |
+| `COPY` | Copies files into the image. |
+| `RUN` | Executes a shell command at build time. |
+| `ENV` | Sets a permanent env var in the image. |
+| `USER` | User the container runs as. |
+| `CMD` | Command to run when the container starts. |
+| `--from=builder` | Copy from a previous stage instead of the build context. |
+| `docker compose up --build` | Build (if needed) and start all services. |
+| `docker compose down` | Stop and remove containers. |
+
+---
+
+## Why This Sets Up Step 5
+
+- CI will run the same `docker build` to verify the image still builds.
+- Cache-friendly layering keeps CI fast.
+- `LINKPULSE_*` env vars give CI a clean way to override config per environment.
 
 ---
 
