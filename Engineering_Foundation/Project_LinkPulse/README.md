@@ -733,6 +733,243 @@ Open **http://127.0.0.1:8000/docs**. Stop with `Ctrl+C` or `docker compose down`
 
 ---
 
-## Step 5 — GitHub Actions CI Pipeline
+# Step 5 — GitHub Actions CI Pipeline
 
-Coming next.
+Every push and PR runs **lint → test → build image** automatically on GitHub's servers. If anything fails, the PR shows a red ❌.
+
+---
+
+## Concepts
+
+| Term | Meaning |
+|---|---|
+| **Workflow** | One YAML file describing a pipeline (lives in `.github/workflows/`). |
+| **Trigger (`on:`)** | Events that start it (push, PR, manual). |
+| **Job** | A unit of work. Runs on its own fresh VM. Jobs run **in parallel** by default. |
+| **Step** | One command or action inside a job. Steps run **sequentially**. |
+| **Runner** | The VM GitHub provides (`ubuntu-latest` by default). |
+| **Action (`uses:`)** | A reusable step from the marketplace (e.g. `actions/checkout`). |
+| **Matrix** | Run the same job with different configs (e.g. multiple Python versions). |
+
+- **Lint** = read code without running it; flag style issues and common bugs. We use **ruff**.
+- **Test** = run pytest against the FastAPI app in-process (no server). Real network calls are mocked so tests are fast and deterministic.
+- **Build** = run the same `docker build` you ran locally. No image is pushed — CI is just verifying it builds.
+
+---
+
+## Step 1 — Add Test Dependencies
+
+Append to `requirements.txt` (or a separate `requirements-dev.txt`):
+
+```
+pytest
+pytest-asyncio
+ruff
+```
+
+Install locally:
+
+```bash
+pip install pytest pytest-asyncio ruff
+```
+
+---
+
+## Step 2 — Ruff Configuration
+
+Create `ruff.toml` in the project root:
+
+```toml
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B"]
+```
+
+- `E` / `F` — pycodestyle + pyflakes (the classics)
+- `I` — import sorting
+- `UP` — pyupgrade (modernize syntax)
+- `B` — bugbear (common mistakes)
+
+Run locally before pushing:
+
+```bash
+ruff check .
+ruff check . --fix     # auto-fix what's safe
+```
+
+---
+
+## Step 3 — A Few Tests
+
+Create `tests/test_app.py`. Tests run **in-process** via FastAPI's `TestClient` — no uvicorn needed, and `httpx.AsyncClient.get` is patched so no real network requests happen.
+
+```python
+from unittest.mock import AsyncMock, patch
+
+import httpx
+from fastapi.testclient import TestClient
+
+from app import app
+
+client = TestClient(app)
+
+
+def _fake_response(url: str, status: int) -> httpx.Response:
+    return httpx.Response(status_code=status, request=httpx.Request("GET", url))
+
+
+@patch("httpx.AsyncClient.get", new_callable=AsyncMock)
+def test_check_ok_and_fail(mock_get):
+    async def side_effect(url, **kwargs):
+        if url.endswith("ok"):
+            return _fake_response(url, 200)
+        return _fake_response(url, 404)
+
+    mock_get.side_effect = side_effect
+
+    resp = client.post("/check", json={"urls": ["https://example.com/ok", "https://example.com/bad"]})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body[0]["ok"] is True
+    assert body[0]["status"] == 200
+    assert body[1]["ok"] is False
+    assert body[1]["status"] == 404
+
+
+def test_check_rejects_invalid_url():
+    resp = client.post("/check", json={"urls": ["not-a-url"]})
+    assert resp.status_code == 422
+
+
+def test_check_rejects_empty_list():
+    resp = client.post("/check", json={"urls": []})
+    assert resp.status_code == 422
+```
+
+Run locally:
+
+```bash
+pytest -q
+```
+
+---
+
+## Step 4 — The Workflow File
+
+Create `.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff check
+        run: ruff check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest pytest-asyncio
+
+      - name: Run tests
+        run: pytest -q
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t linkpulse:ci .
+```
+
+**Line-by-line:**
+
+| Line | Meaning |
+|---|---|
+| `on: push: branches: [main]` | Run when someone pushes to `main`. |
+| `on: pull_request:` | Also run on every PR from any branch. |
+| `jobs:` | Three parallel jobs: `lint`, `test`, `build`. |
+| `runs-on: ubuntu-latest` | GitHub gives each job a fresh Ubuntu VM. |
+| `actions/checkout@v4` | Copies your repo into the VM. |
+| `actions/setup-python@v5` + `cache: pip` | Installs Python; caches pip downloads between runs. |
+| `ruff check .` | Fails the job (exit ≠ 0) on any lint issue. |
+| `pytest -q` | Fails the job on any test failure. |
+| `docker build -t linkpulse:ci .` | Verifies the Dockerfile still builds. Image is discarded. |
+
+Jobs run in parallel, so total time = the slowest job, not the sum.
+
+---
+
+## Step 5 — Commit and Watch It Run
+
+```bash
+git add .github requirements.txt ruff.toml tests/
+git commit -m "Add CI: lint, test, docker build"
+git push
+```
+
+On GitHub → **Actions** tab → click the latest run → see the three jobs start in parallel with live logs. First run is slower (cold cache); subsequent runs are fast thanks to pip caching.
+
+---
+
+## Common Gotchas
+
+- **Tests pass locally but fail in CI** → something is in your venv but not in `requirements.txt`. CI installs only what's listed.
+- **`ruff check` fails on line length** → tune `line-length` in `ruff.toml` or wrap the lines.
+- **Docker build slow in CI** → normal on first run. Later, switch to `docker/build-push-action` with `cache-from`/`cache-to`.
+- **`pytest` can't find `app`** → run pytest from the repo root. If needed, add `pythonpath = .` to `pytest.ini`.
+- **Workflow doesn't trigger** → verify the file is at exactly `.github/workflows/ci.yml`. YAML is whitespace-sensitive (2 spaces, no tabs).
+
+---
+
+## Mental Model Cheat Sheet
+
+| Piece | What it does |
+|---|---|
+| `.github/workflows/ci.yml` | Where GitHub looks for pipelines. |
+| `on:` | Events that trigger the workflow. |
+| `jobs:` | Parallel units of work; each on its own VM. |
+| `steps:` | Sequential commands inside one job. |
+| `uses:` | Pull in a published action. |
+| `run:` | Run a shell command. |
+| `actions/checkout@v4` | Clone the repo into the runner. |
+| `actions/setup-python@v5` | Install Python + cache pip. |
+| Exit code ≠ 0 | Marks the step (and job) as failed. |
+
+---
+
+## What You Have Now
+
+- ✅ Async core (`async_core.py`) — concurrent URL checking
+- ✅ FastAPI layer (`app.py`) — `/check` + `/check/stream` with validation & DI
+- ✅ SSE streaming — results arrive as they finish
+- ✅ Docker + Compose — `docker compose up --build` runs anywhere
+- ✅ GitHub Actions CI — every push/PR runs lint, tests, and a Docker build
