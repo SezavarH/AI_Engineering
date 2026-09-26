@@ -1,0 +1,2618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Backend + AI Engineering: Zero → Senior Interview Lab</title>
+<style>
+:root{
+  --bg:#080d18;--panel:#101827;--panel2:#152036;--panel3:#0b1220;
+  --text:#e8eef9;--muted:#9eabc0;--line:#283650;--blue:#6ea8fe;
+  --green:#46d39a;--red:#ff6b7a;--yellow:#ffd166;--purple:#b49cff;
+  --cyan:#5ee7f7;--shadow:0 12px 35px rgba(0,0,0,.25)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+header{
+ position:sticky;top:0;z-index:20;background:rgba(8,13,24,.94);
+ backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 24px
+}
+h1{font-size:23px;margin:0}
+h2{font-size:29px;margin:0 0 10px}
+h3{font-size:21px;margin-top:30px}
+h4{font-size:17px;margin-bottom:6px}
+p{max-width:900px}
+.small{font-size:13px;color:var(--muted)}
+.progress{height:4px;background:#1b2941;margin:12px -24px -14px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.layout{max-width:1550px;margin:auto;display:grid;grid-template-columns:270px minmax(0,1fr)}
+aside{
+ position:sticky;top:69px;height:calc(100vh - 69px);overflow:auto;
+ padding:20px 14px;border-right:1px solid var(--line)
+}
+aside .group{margin:18px 0}
+aside b{display:block;color:#fff;margin-bottom:5px}
+aside a{display:block;padding:5px 9px;color:var(--muted);border-radius:6px;font-size:13px}
+aside a:hover{background:var(--panel2);color:#fff;text-decoration:none}
+main{padding:35px;min-width:0}
+section{scroll-margin-top:88px}
+.topic{margin:60px 0}
+.hero,.card,.box,.callout,.bridge,.quiz,.snapshot,.diagram,.prereq{
+ background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)
+}
+.hero{padding:28px;margin-bottom:25px;background:linear-gradient(135deg,#121d34,#0e1628)}
+.card,.box,.callout,.bridge,.quiz,.snapshot,.prereq{padding:16px;margin:13px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.callout{border-left:4px solid var(--blue)}
+.intuition{border-left-color:var(--cyan)}
+.trap{border-left-color:var(--yellow)}
+.senior{border-left-color:var(--green)}
+.interview{border-left-color:var(--purple)}
+.production{border-left-color:#ff8c69}
+.bridge{background:#0d1a2d;border-color:#355c8e}
+.prereq{background:#0d1525}
+.prereq b{color:var(--cyan)}
+.chip{
+ display:inline-block;padding:4px 9px;border-radius:999px;background:#1c2a43;
+ border:1px solid #30415f;font-size:12px;margin:3px
+}
+.chip.take{background:#12372d;border-color:#246e55;color:#8df0c7}
+.mind{padding:16px;background:#0c1423;border:1px solid var(--line);border-radius:12px}
+.legend{padding:13px 17px;background:#0d1627;border-left:3px solid var(--cyan);margin-top:10px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:10px 0}
+.node{padding:8px 11px;border:1px solid #38527b;background:#182640;border-radius:8px}
+.arrow{color:var(--blue);font-weight:bold}
+svg{width:100%;height:auto;max-width:950px}
+.diagram{padding:14px;overflow:auto}
+.diagram-caption{font-size:13px;color:var(--muted);margin-top:6px}
+.series{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:16px 0}
+.series span{padding:6px 10px;border-radius:7px;background:#18243a;border:1px solid var(--line);font-size:12px}
+.series .active{background:#21466f;border-color:#477db6}
+details{
+ background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:12px 0;overflow:hidden
+}
+summary{cursor:pointer;padding:13px 16px;font-weight:700;background:#121c2e}
+details>div{padding:2px 17px 17px}
+pre{
+ position:relative;background:#070b13;border:1px solid #26324a;border-radius:9px;
+ padding:17px;overflow:auto;color:#dbe7fa;margin:12px 0
+}
+code{font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+.copy{
+ position:absolute;right:8px;top:8px;border:0;border-radius:5px;padding:5px 9px;
+ background:#263754;color:#fff;cursor:pointer
+}
+.kw{color:#b9a5ff}.str{color:#8be9a8}.num{color:#7ddcff}.cm{color:#71809b}.fn{color:#72b7ff}
+.add{display:block;background:rgba(70,211,154,.14);border-left:3px solid var(--green)}
+.del{display:block;background:rgba(255,107,122,.14);border-left:3px solid var(--red)}
+.note{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:9px;vertical-align:top;text-align:left}
+th{background:var(--panel2)}
+.reveal{
+ border:0;border-radius:6px;background:#263d61;color:#fff;padding:7px 10px;
+ cursor:pointer;margin:4px 3px
+}
+.answer{display:none;padding:10px;background:#102a23;border-left:3px solid var(--green);margin-top:8px}
+.answer.show{display:block}
+.snapshot{font-family:ui-monospace,monospace;background:#090e17}
+.snapbar{display:flex;gap:13px;align-items:center;border-bottom:1px solid #28354c;padding:9px;margin:-16px -16px 12px}
+.ok{color:var(--green)}.wait{color:var(--yellow)}.bad{color:var(--red)}
+.timeline{display:grid;grid-template-columns:100px 1fr;gap:7px;align-items:center}
+.lane{height:28px;background:#142038;border-radius:5px;position:relative}
+.lane i{position:absolute;height:100%;background:#315c91;border-radius:5px}
+blockquote{margin:12px 0;padding:12px 16px;border-left:3px solid var(--purple);background:#12182b}
+ul{padding-left:22px}
+kbd{background:#202c43;border:1px solid #354563;border-radius:4px;padding:2px 5px}
+footer{text-align:center;color:var(--muted);padding:45px}
+@media(max-width:850px){
+ .layout{display:block}
+ aside{position:relative;top:0;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:18px}h2{font-size:24px}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>Backend + AI Engineering Lab <span class="small">zero → senior interview readiness</span></h1>
+  <div class="progress"><i id="progress"></i></div>
+</header>
+
+<div class="layout">
+<aside>
+  <div class="group"><b>Start</b><a href="#start">How to use</a><a href="#mental-model">System mental model</a></div>
+  <div class="group"><b>1 · API foundations</b>
+    <a href="#rest">REST first principles</a><a href="#pydantic">Pydantic</a>
+    <a href="#fastapi-core">FastAPI constructs</a><a href="#depends">Depends deep dive</a>
+    <a href="#fastapi-build">FastAPI build</a>
+  </div>
+  <div class="group"><b>2 · Concurrency</b>
+    <a href="#async">Async model</a><a href="#async-primitives">Primitives</a><a href="#async-build">Worked task</a>
+  </div>
+  <div class="group"><b>3 · Streaming</b>
+    <a href="#sse">SSE first principles</a><a href="#sse-browser">Browser first</a><a href="#sse-build">SSE build</a>
+  </div>
+  <div class="group"><b>4 · Redis</b>
+    <a href="#redis">Redis first principles</a><a href="#cache">Cache scenario</a>
+  </div>
+  <div class="group"><b>5 · Docker</b>
+    <a href="#docker">Docker model</a><a href="#docker-build">Dockerfile build</a>
+  </div>
+  <div class="group"><b>6 · Compose</b><a href="#compose">Compose build</a></div>
+  <div class="group"><b>7 · CI/CD</b><a href="#cicd">Snapshots + YAML</a></div>
+  <div class="group"><b>8 · Capstone</b><a href="#capstone">Production system</a></div>
+</aside>
+
+<main>
+
+<!-- ============================================================ -->
+<!-- START -->
+<!-- ============================================================ -->
+
+<section id="start" class="hero">
+<h2>How to use this file</h2>
+<p>This is a guided build, not a reference sheet. Each idea appears because the previous design created a specific problem.</p>
+
+<div class="grid">
+<div class="card"><b>1. Understand</b><br>Define the thing in plain English before seeing the API.</div>
+<div class="card"><b>2. Build</b><br>Start with the smallest working scenario.</div>
+<div class="card"><b>3. Break</b><br>Name the exact production failure the next version fixes.</div>
+<div class="card"><b>4. Explain</b><br>Practice the design decision as if an interviewer asked “why?”</div>
+</div>
+
+<div class="callout intuition">
+💡 <b>Intuition:</b> Backend engineering is the art of moving data between boundaries without losing correctness, capacity, or observability.
+</div>
+
+<div class="callout interview">
+📌 <b>Interview rule:</b> Do not start with “I would use Redis.” Start with the problem: repeated expensive reads, shared state, or burst protection.
+</div>
+</section>
+
+<section id="mental-model" class="topic">
+<h2>The whole system before the details</h2>
+
+<div class="mind">
+<div class="flow">
+<span class="node">Browser</span><span class="arrow">→</span>
+<span class="node">HTTP API</span><span class="arrow">→</span>
+<span class="node">Validation</span><span class="arrow">→</span>
+<span class="node">Service logic</span><span class="arrow">→</span>
+<span class="node">Redis / DB / LLM</span>
+</div>
+<div class="flow">
+<span class="node">Streaming response</span><span class="arrow">←</span>
+<span class="node">SSE</span><span class="arrow">←</span>
+<span class="node">Async I/O</span>
+</div>
+<div class="flow">
+<span class="node">Docker image</span><span class="arrow">→</span>
+<span class="node">Compose</span><span class="arrow">→</span>
+<span class="node">CI</span><span class="arrow">→</span>
+<span class="node">Registry</span><span class="arrow">→</span>
+<span class="node">Deployment</span>
+</div>
+</div>
+
+<div class="legend">
+📖 <b>How to read this map:</b>
+<ol>
+<li><b>Browser</b> is the caller.</li>
+<li><b>HTTP API</b> defines the external contract.</li>
+<li><b>Validation</b> rejects malformed input before business logic.</li>
+<li><b>Service logic</b> decides what the application should do.</li>
+<li><b>Redis/DB/LLM</b> are dependencies and therefore failure boundaries.</li>
+<li><b>SSE</b> sends incremental server results to the caller.</li>
+<li><b>Async I/O</b> prevents waiting on networks from unnecessarily blocking other requests.</li>
+<li><b>Docker/Compose/CI</b> make the same application reproducible and deliverable.</li>
+</ol>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- REST -->
+<!-- ============================================================ -->
+
+<section id="rest" class="topic">
+<h2>1. REST, HTTP and API design</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><b>Python function:</b> a named block that accepts input and returns output.</li>
+<li><b>JSON:</b> text representing objects, arrays, strings, numbers, booleans and null.</li>
+<li><b>Network request:</b> a client sends bytes to a server and waits for a response.</li>
+</ul>
+</div>
+
+<div class="mind">
+<div class="flow">
+<span class="node">Resource</span>→<span class="node">URI</span>→<span class="node">HTTP method</span>→
+<span class="node">Request</span>→<span class="node">Server</span>→<span class="node">Status</span>→<span class="node">Representation</span>
+</div>
+</div>
+<div class="legend">
+📖 <b>How to read this mind map:</b>
+Resource is the thing the API manages. URI names where it lives. The HTTP method says what operation the caller wants. The server processes it. Status communicates the outcome. Representation is the data sent back.
+</div>
+
+<details open>
+<summary>What is a resource?</summary>
+<div>
+<p><b>What is it?</b> A resource is a thing your API exposes, such as a product price.</p>
+<p><b>Why does it exist?</b> Clients need a stable concept to address instead of calling arbitrary server functions.</p>
+<p><b>When?</b> Use a resource when clients need to read or manipulate identifiable application data.</p>
+<p><b>Where?</b> Its URI is designed in the API layer, for example <code>/prices/A1</code>.</p>
+<pre><code>GET /prices/A1
+→ {"sku":"A1","price":19.90}</code></pre>
+<p><b>What breaks if skipped?</b> Your API becomes a collection of ad-hoc commands whose semantics are difficult to predict.</p>
+</div>
+</details>
+
+<details>
+<summary>What is a URI?</summary>
+<div>
+<p><b>What is it?</b> A URI is the identifier a client uses to refer to a resource.</p>
+<p><b>Why?</b> It separates “what thing?” from “what operation?”</p>
+<p><b>When?</b> Use a stable URI for resources and collections.</p>
+<p><b>Where?</b> In route declarations such as <code>/prices/{sku}</code>.</p>
+<pre><code>/prices
+/prices/A1</code></pre>
+<p><b>Failure mode:</b> putting verbs into every path, such as <code>/getPrice</code>, makes HTTP semantics harder to compose.</p>
+</div>
+</details>
+
+<details>
+<summary>What does stateless mean?</summary>
+<div>
+<p><b>What is it?</b> Each request contains the information needed to understand it rather than depending on hidden server-side conversation state.</p>
+<p><b>Why?</b> Any healthy server instance can handle the next request.</p>
+<p><b>When?</b> It is the default REST design principle; authentication tokens are normally sent with each request.</p>
+<p><b>Where?</b> Request headers, path, query and body.</p>
+<pre><code>GET /prices/A1
+Authorization: Bearer TOKEN</code></pre>
+<p><b>Failure mode:</b> a client works only when routed back to worker #2 because worker #2 remembers an undocumented session state.</p>
+</div>
+</details>
+
+<h3>HTTP verbs: one price resource</h3>
+
+<table>
+<tr><th>Verb</th><th>Meaning</th><th>Idempotent?</th><th>Scenario request</th><th>Typical response</th></tr>
+<tr><td>GET</td><td>Read</td><td>Yes</td><td><code>GET /prices/A1</code></td><td>200 + price</td></tr>
+<tr><td>POST</td><td>Create subordinate resource / command</td><td>No</td><td><code>POST /prices</code></td><td>201 + created object</td></tr>
+<tr><td>PUT</td><td>Replace a resource</td><td>Yes</td><td><code>PUT /prices/A1</code></td><td>200/204</td></tr>
+<tr><td>PATCH</td><td>Partially modify</td><td>Not inherently</td><td><code>PATCH /prices/A1</code></td><td>200/204</td></tr>
+<tr><td>DELETE</td><td>Remove</td><td>Yes</td><td><code>DELETE /prices/A1</code></td><td>204</td></tr>
+</table>
+
+<div class="box">
+<h4>Worked scenario: Price API</h4>
+<p><b>Caller:</b> browser or mobile app.</p>
+<p><b>Rule:</b> SKU is exactly six characters; price must be positive; clients should never receive internal supplier credentials.</p>
+<pre><code>POST /prices
+{"sku":"A10001","amount":19.90,"currency":"EUR"}
+
+→ 201 Created
+{"id":"p_123","sku":"A10001","amount":19.90,"currency":"EUR"}</code></pre>
+</div>
+
+<h3>Status codes juniors actually need</h3>
+<table>
+<tr><th>Code</th><th>Use it when</th></tr>
+<tr><td>200</td><td>Request succeeded and returns a representation.</td></tr>
+<tr><td>201</td><td>A new resource was created.</td></tr>
+<tr><td>202</td><td>Work was accepted but is not finished yet.</td></tr>
+<tr><td>204</td><td>Succeeded with no response body.</td></tr>
+<tr><td>301</td><td>Resource permanently moved.</td></tr>
+<tr><td>304</td><td>Cached representation is still valid.</td></tr>
+<tr><td>400</td><td>Malformed request semantics.</td></tr>
+<tr><td>401</td><td>Authentication is missing/invalid.</td></tr>
+<tr><td>403</td><td>Authenticated caller is not allowed.</td></tr>
+<tr><td>404</td><td>Resource does not exist.</td></tr>
+<tr><td>409</td><td>Request conflicts with current state.</td></tr>
+<tr><td>422</td><td>Input has valid HTTP shape but violates validation rules.</td></tr>
+<tr><td>429</td><td>Caller exceeded a rate limit.</td></tr>
+<tr><td>500</td><td>Unexpected server failure.</td></tr>
+<tr><td>503</td><td>Service temporarily unavailable.</td></tr>
+</table>
+
+<div class="callout intuition">
+💡 <b>Why REST exists:</b> REST gives clients a uniform interface around resources over HTTP. It favors cacheability, stateless interactions and predictable semantics.
+</div>
+
+<div class="callout">
+📌 <b>When not to choose REST:</b> use RPC/gRPC when explicit procedure calls and efficient service-to-service contracts are more important; GraphQL when clients need flexible field selection; WebSockets when both sides need continuous bidirectional messages.
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: HTTP semantics are part of your API contract, not decoration.</span></div>
+<div class="callout"><span class="chip take">You can now do: design a price resource before writing FastAPI code.</span></div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- PYDANTIC -->
+<!-- ============================================================ -->
+
+<section id="pydantic" class="topic">
+<h2>Pydantic: turning untrusted data into typed application data</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#rest">Resource</a> — the API-managed thing.</li>
+<li><a href="#rest">HTTP request/body</a> — data supplied by the caller.</li>
+<li><a href="#rest">Response representation</a> — data returned to the caller.</li>
+</ul>
+</div>
+
+<details open>
+<summary>What is BaseModel?</summary>
+<div>
+<p><b>What is it?</b> <code>BaseModel</code> is a Python class whose instances validate, parse and serialize structured data.</p>
+<p><b>Why?</b> Raw dictionaries do not enforce types or constraints.</p>
+<p><b>When?</b> Use it at data boundaries and for explicit schemas.</p>
+<p><b>Where?</b> Usually <code>app/models/</code> or feature-local <code>schemas.py</code>.</p>
+<pre><code>from pydantic import BaseModel
+class PriceRequest(BaseModel):
+    sku: str
+    amount: float</code></pre>
+<p><b>Failure mode:</b> invalid data leaks into services and errors appear far away from the actual boundary.</p>
+</div>
+</details>
+
+<h3>Named-type mapping</h3>
+<table>
+<tr><th>Type</th><th>Purpose</th><th>When</th><th>When NOT</th><th>Real file</th></tr>
+<tr><td>Request model</td><td>External input contract</td><td>POST/PATCH body</td><td>As database entity</td><td><code>app/schemas/price.py</code></td></tr>
+<tr><td>Domain/internal model</td><td>Business representation</td><td>Service logic</td><td>Directly as public API</td><td><code>app/domain/price.py</code></td></tr>
+<tr><td>Response model</td><td>Public output contract</td><td>API responses</td><td>Accepting client input</td><td><code>app/schemas/price.py</code></td></tr>
+</table>
+
+<div class="box">
+<h4>Same scenario, three types</h4>
+<pre><code># Request: what client may send
+class PriceRequest(BaseModel):
+    sku: str = Field(min_length=6, max_length=6)
+    amount: float = Field(gt=0)
+
+# Internal: what business logic needs
+@dataclass
+class Price:
+    id: str
+    sku: str
+    amount_cents: int
+    supplier_id: str
+
+# Response: what client is allowed to see
+class PriceResponse(BaseModel):
+    id: str
+    sku: str
+    amount: float</code></pre>
+<p>The request contains user-facing units. The internal model uses integer cents and a private supplier ID. The response deliberately excludes internal data.</p>
+</div>
+
+<details>
+<summary>Field constraints</summary>
+<div>
+<p><b>What is it?</b> A <code>Field</code> declares constraints and metadata for one field.</p>
+<p><b>Why?</b> Validation should be executable rather than living only in documentation.</p>
+<p><b>When?</b> Use built-in constraints for simple rules.</p>
+<p><b>Where?</b> Request/response schema definitions.</p>
+<pre><code>sku: str = Field(min_length=6, max_length=6)
+qty: int = Field(gt=0)</code></pre>
+<p><b>Failure mode:</b> invalid values reach business logic.</p>
+</div>
+</details>
+
+<details>
+<summary>Validators</summary>
+<div>
+<p><b>What is it?</b> A validator is a function that enforces a rule more complex than a simple type/constraint.</p>
+<p><b>Why?</b> Some rules involve normalization or multiple fields.</p>
+<p><b>When?</b> Use it when the rule belongs to the schema boundary.</p>
+<p><b>Where?</b> The Pydantic model.</p>
+<pre><code>from pydantic import field_validator
+
+class SKU(BaseModel):
+    value: str
+
+    @field_validator("value")
+    @classmethod
+    def uppercase(cls, v):
+        return v.upper()</code></pre>
+<p><b>Failure mode:</b> every caller implements normalization differently.</p>
+</div>
+</details>
+
+<details>
+<summary>Serialization and validation</summary>
+<div>
+<pre><code>payload = request.model_dump()
+obj = PriceResponse.model_validate(payload)</code></pre>
+<p><code>model_dump()</code> produces Python data. <code>model_validate()</code> constructs a model from compatible data.</p>
+</div>
+</details>
+
+<div class="callout trap">⚠️ <b>Junior trap:</b> returning your ORM/domain object directly can accidentally expose internal fields.</div>
+<div class="callout senior">🎯 <b>Senior habit:</b> external schema and internal domain model may look similar, but they have different ownership and change rates.</div>
+
+<div class="callout"><span class="chip take">Takeaway: Pydantic turns API boundaries into executable contracts.</span></div>
+<div class="callout"><span class="chip take">You can now do: distinguish request, domain and response types.</span></div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- FASTAPI CORE -->
+<!-- ============================================================ -->
+
+<section id="fastapi-core" class="topic">
+<h2>FastAPI core constructs</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#rest">HTTP verbs and status codes</a>.</li>
+<li><a href="#pydantic">Pydantic models</a>.</li>
+<li><a href="#rest">Request/response boundary</a>.</li>
+</ul>
+</div>
+
+<h3>Path, query and body parameters</h3>
+<div class="box">
+<p><b>What is it?</b> Three places where request input can live.</p>
+<p><b>Why?</b> The location communicates semantics.</p>
+<p><b>When?</b> Path identifies a resource; query modifies/filter the read; body carries structured content.</p>
+<p><b>Where?</b> Route function signature.</p>
+<pre><code>@app.get("/prices/{sku}")
+async def get_price(
+    sku: str,                 # path
+    region: str = "EU",       # query
+):
+    ...
+
+@app.post("/prices")
+async def create_price(req: PriceRequest):  # body
+    ...</code></pre>
+<p><b>Failure mode:</b> clients cannot predict where inputs belong.</p>
+</div>
+
+<h3>Routers</h3>
+<div class="box">
+<p><b>What is it?</b> <code>APIRouter</code> groups related routes.</p>
+<p><b>Why?</b> A single application file becomes unmaintainable.</p>
+<p><b>When?</b> Feature boundaries or API versions.</p>
+<p><b>Where?</b> <code>app/routers/price.py</code>.</p>
+<pre><code>router = APIRouter(prefix="/v1/prices")
+
+@router.get("/{sku}")
+async def get_price(sku: str):
+    ...</code></pre>
+<p><b>Failure mode:</b> routes, dependencies and unrelated business logic become one giant module.</p>
+</div>
+
+<h3>Middleware</h3>
+<div class="box">
+<p><b>What is it?</b> Middleware wraps requests before and after route handling.</p>
+<p><b>Why?</b> Cross-cutting behavior should not be copied into every route.</p>
+<p><b>When?</b> Request IDs, timing, trusted proxy handling, broad headers.</p>
+<p><b>Where?</b> <code>app/main.py</code>.</p>
+<pre><code>@app.middleware("http")
+async def timing(request, call_next):
+    start = time.monotonic()
+    response = await call_next(request)
+    response.headers["X-Time"] = str(time.monotonic()-start)
+    return response</code></pre>
+<p><b>Failure mode:</b> duplicated instrumentation and inconsistent behavior.</p>
+</div>
+
+<h3>Exception handler</h3>
+<div class="box">
+<p><b>What is it?</b> A function that converts a raised exception into a controlled HTTP response.</p>
+<p><b>Why?</b> Raw exceptions otherwise become generic 500 responses.</p>
+<p><b>When?</b> For consistent public error shapes.</p>
+<p><b>Where?</b> API/application setup.</p>
+<pre><code>@app.exception_handler(ValueError)
+async def handle_value_error(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"error":"bad_request"}
+    )</code></pre>
+<p><b>Failure mode:</b> clients receive inconsistent errors and sensitive stack traces may leak.</p>
+</div>
+
+<h3>BackgroundTasks</h3>
+<div class="box">
+<p><b>What is it?</b> FastAPI's small mechanism for work scheduled after the response is sent.</p>
+<p><b>Why?</b> Some lightweight work does not belong on the critical response path.</p>
+<p><b>When?</b> Small non-critical tasks such as writing a local audit event.</p>
+<p><b>Where?</b> Route layer.</p>
+<pre><code>from fastapi import BackgroundTasks
+
+@app.post("/price")
+async def price(background_tasks: BackgroundTasks):
+    background_tasks.add_task(write_audit)
+    return {"ok": True}</code></pre>
+<p><b>Failure mode:</b> using it for durable jobs means work can disappear when the process dies.</p>
+<div class="callout trap">⚠️ For durable jobs use a real queue/worker system rather than treating BackgroundTasks as a distributed job queue.</div>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: FastAPI constructs solve different boundaries; do not use middleware, dependencies and background tasks interchangeably.</span></div>
+<div class="callout"><span class="chip take">You can now do: organize an API into routes, schemas, cross-cutting middleware and controlled errors.</span></div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- DEPENDS -->
+<!-- ============================================================ -->
+
+<section id="depends" class="topic">
+<h2>Depends — the dependency graph</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#fastapi-core">Route functions</a> — receive request inputs and return responses.</li>
+<li><a href="#pydantic">Typed schemas</a> — define structured boundaries.</li>
+<li><a href="#rest">Request lifecycle</a> — server receives request, executes code, returns response.</li>
+</ul>
+</div>
+
+<div class="callout intuition">
+💡 <b>Plain English:</b> <code>Depends</code> means: <b>“Before the route runs, call this function and hand me its return value.”</b>
+</div>
+
+<div class="box">
+<p><b>Why was it invented?</b> Without dependency injection, routes manually create auth objects, DB sessions, clients and configuration.</p>
+<div class="grid">
+<pre><code># Naive
+async def route():
+    db = make_db()
+    user = get_user()
+    return await service(db, user)</code></pre>
+<pre><code># Dependency
+async def route(
+    db=Depends(get_db),
+    user=Depends(get_user)
+):
+    return await service(db, user)</code></pre>
+</div>
+<p><b>How it works under the hood:</b> FastAPI inspects the route signature and resolves dependencies before calling the route. It builds a dependency graph, resolves sub-dependencies, and by default caches each dependency result for that request (<code>use_cache=True</code>).</p>
+</div>
+
+<h3>Example A — constant configuration</h3>
+<pre><code>def get_region():
+    return "EU"
+
+@app.get("/prices")
+async def prices(region=Depends(get_region)):
+    return {"region": region}</code></pre>
+<p><b>Use this when:</b> a value has one injection point and you want easy replacement in tests.</p>
+
+<h3>Example B — DB/session-like resource</h3>
+<pre><code>async def get_db():
+    db = await pool.acquire()
+    try:
+        yield db
+    finally:
+        await pool.release(db)
+
+@app.get("/prices/{sku}")
+async def price(sku: str, db=Depends(get_db)):
+    return await db.fetch_price(sku)</code></pre>
+<p><b>Why <code>yield</code>?</b> Code before <code>yield</code> prepares the resource; code after it cleans it up after the request.</p>
+
+<h3>Example C — current user from a header</h3>
+<pre><code>async def current_user(
+    authorization: str = Header(...)
+):
+    token = authorization.removeprefix("Bearer ")
+    return await verify_token(token)
+
+@app.get("/me")
+async def me(user=Depends(current_user)):
+    return {"user_id": user.id}</code></pre>
+
+<h3>Example D — yield resource with cleanup</h3>
+<pre><code>async def get_http_client():
+    client = httpx.AsyncClient(timeout=5)
+    try:
+        yield client
+    finally:
+        await client.aclose()</code></pre>
+
+<h3>Class-based dependency with __call__</h3>
+<pre><code>class Region:
+    def __init__(self, default):
+        self.default = default
+
+    def __call__(self, x: str | None = None):
+        return x or self.default
+
+eu_region = Region("EU")
+region = Depends(eu_region)</code></pre>
+
+<h3>Overriding in tests</h3>
+<pre><code>app.dependency_overrides[get_db] = fake_db
+response = await client.get("/prices/A1")
+assert response.status_code == 200
+app.dependency_overrides.clear()</code></pre>
+
+<div class="callout trap">
+⚠️ <b>Common misuses:</b> performing I/O at import time; using an async dependency when it does no async work; forgetting <code>yield</code> cleanup for leased resources.
+</div>
+
+<div class="callout senior">
+🎯 <b>Senior habit:</b> Dependencies are boundaries for replaceable infrastructure. Keep business rules in services, not inside dependency plumbing.
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: Depends builds a per-request dependency graph and gives you clean lifecycle/test seams.</span></div>
+<div class="callout"><span class="chip take">You can now do: inject DB, auth and clients without constructing them inside every route.</span></div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- FASTAPI ITERATIVE -->
+<!-- ============================================================ -->
+
+<section id="fastapi-build" class="topic">
+<h2>FastAPI iterative build: the price service</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#rest">POST and 422/201/500 semantics</a>.</li>
+<li><a href="#pydantic">Request/response models</a>.</li>
+<li><a href="#depends">Depends</a> — dependency resolution before a route.</li>
+<li><a href="#fastapi-core">exception handlers and lifespan</a>.</li>
+</ul>
+</div>
+
+<div class="box">
+<h4>Scenario</h4>
+<p><b>Caller:</b> browser/mobile client.</p>
+<p><b>Input:</b> <code>{"sku":"A10001","qty":3}</code>.</p>
+<p><b>Output:</b> <code>{"sku":"A10001","total":59.70}</code>.</p>
+<p><b>Rules:</b> SKU exactly six characters, quantity positive, service should not expose supplier credentials, and external calls have a timeout.</p>
+</div>
+
+<div class="series">
+<span class="active">v1 basic</span>→<span>v2 validation</span>→<span>v3 async + DI</span>→<span>v4 errors + lifespan</span>→<span>v5 production</span>
+</div>
+
+<details open>
+<summary>Beginner · v1 — smallest working version</summary>
+<div>
+<p><b>Scenario · File:</b> browser calls <code>POST /price</code> · <code>app/main.py</code>.</p>
+<p><b>Why:</b> establish the HTTP path before adding abstractions.</p>
+<pre><button class="copy">copy</button><code>from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.post("/price")
+def price(body: dict):
+    return {"sku": body["sku"], "total": 59.70}</code></pre>
+<p class="note"><b>Where this lives:</b> <code>app/main.py</code>.</p>
+</div>
+</details>
+
+<div class="bridge"><b>Problem with v1:</b> any JSON shape is accepted and a missing key becomes an uncontrolled server error.</div>
+
+<details>
+<summary>Intermediate · v2 — validation</summary>
+<div>
+<p><b>Scenario · File:</b> same client · <code>app/schemas/price.py</code> + <code>app/routers/price.py</code>.</p>
+<pre><button class="copy">copy</button><code>from pydantic import BaseModel, Field
+
+class PriceRequest(BaseModel):
+    sku: str = Field(min_length=6, max_length=6)
+    qty: int = Field(gt=0)
+
+@app.post("/price")
+def price(body: PriceRequest):
+<mark>    return {"sku": body.sku, "total": 59.70}</mark></code></pre>
+<p>Only the boundary changed: invalid payloads now fail before the route body executes.</p>
+<p class="note"><b>Where this lives:</b> schemas in <code>app/schemas/price.py</code>; route in <code>app/routers/price.py</code>.</p>
+</div>
+</details>
+
+<div class="bridge"><b>Problem with v2:</b> the route is synchronous and tightly coupled to how it gets external price data.</div>
+
+<details>
+<summary>Advanced · v3 — async dependency</summary>
+<div>
+<pre><button class="copy">copy</button><code>async def get_pricing_client():
+    return app.state.pricing
+
+@app.post("/price")
+async def price(
+    body: PriceRequest,
+<mark>    client=Depends(get_pricing_client)</mark>
+):
+<mark>    price = await client.get(body.sku)</mark>
+    return {
+        "sku": body.sku,
+        "total": price * body.qty
+    }</code></pre>
+<p><b>What changed:</b> network waiting can yield control, and infrastructure is injected instead of created in the route.</p>
+<p class="note"><b>Where this lives:</b> route: <code>app/routers/price.py</code>; dependency/client: <code>app/dependencies.py</code>.</p>
+</div>
+</details>
+
+<div class="bridge"><b>Problem with v3:</b> an unexpected upstream exception produces an ugly generic 500, and a client should not be recreated for every request.</div>
+
+<details>
+<summary>Advanced · v4 — errors + lifespan, separated first</summary>
+<div>
+<div class="box">
+<h4>What is an exception handler?</h4>
+<p>It is the application's translator from an exception into a controlled HTTP response.</p>
+<pre><code>@app.exception_handler(PricingUnavailable)
+async def pricing_error(request, exc):
+    return JSONResponse(
+        status_code=503,
+        content={"error":"pricing_unavailable"}
+    )</code></pre>
+<p>Line 1 registers the handler. Line 2 receives the request and exception. The response communicates a temporary dependency failure rather than pretending the client made a bad request.</p>
+</div>
+
+<div class="box">
+<h4>What is lifespan?</h4>
+<p>Lifespan is the app's <b>opening and closing ceremony</b>: code before <code>yield</code> runs once at startup; code after it runs once at shutdown.</p>
+<pre><code>@asynccontextmanager
+async def lifespan(app):
+    app.state.pricing = PricingClient(timeout=5)
+    yield
+    await app.state.pricing.close()
+
+app = FastAPI(lifespan=lifespan)</code></pre>
+<p>The client is created once. Shutdown closes it exactly where its lifecycle is defined.</p>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 850 190">
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#6ea8fe"/></marker></defs>
+<line x1="80" y1="50" x2="250" y2="50" stroke="#6ea8fe" marker-end="url(#a)"/>
+<line x1="310" y1="50" x2="480" y2="50" stroke="#6ea8fe" marker-end="url(#a)"/>
+<line x1="540" y1="50" x2="720" y2="50" stroke="#6ea8fe" marker-end="url(#a)"/>
+<text x="10" y="55" fill="#fff">startup</text><text x="260" y="55" fill="#fff">lifespan yield</text>
+<text x="490" y="55" fill="#fff">request</text><text x="730" y="55" fill="#fff">shutdown</text>
+<rect x="390" y="100" width="150" height="45" rx="8" fill="#162744" stroke="#38527b"/>
+<text x="405" y="128" fill="#fff">handler → 503</text>
+<line x1="465" y1="95" x2="465" y2="58" stroke="#46d39a" marker-end="url(#a)"/>
+</svg>
+<div class="diagram-caption">Takeaway: resources live across the application lifetime; exceptions are translated at the HTTP boundary.</div>
+</div>
+
+<table>
+<tr><th></th><th>Before</th><th>After</th></tr>
+<tr><td>User response</td><td>generic 500</td><td>structured 503</td></tr>
+<tr><td>Client usage</td><td>new client/request</td><td>shared lifecycle-managed client</td></tr>
+<tr><td>Operations</td><td>unclear failure</td><td>explicit dependency failure</td></tr>
+</table>
+
+<p class="note"><b>Where this lives:</b> handler and lifespan in <code>app/main.py</code>; pricing client in <code>app/services/pricing.py</code>.</p>
+</div>
+</details>
+
+<div class="bridge"><b>Problem with v4:</b> production also needs bounded input/output contracts, request IDs, health checks and tests.</div>
+
+<details>
+<summary>Senior · v5 — production-shaped final</summary>
+<div>
+<pre><button class="copy">copy</button><code>class PriceResponse(BaseModel):
+    sku: str
+    total: float
+    request_id: str
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+@router.post(
+    "/price",
+    response_model=PriceResponse
+)
+async def price(
+    body: PriceRequest,
+    client=Depends(get_pricing_client),
+    request_id: str = Depends(get_request_id),
+):
+    try:
+        async with asyncio.timeout(5):
+            unit = await client.get(body.sku)
+    except TimeoutError:
+        raise PricingUnavailable()
+
+    return PriceResponse(
+        sku=body.sku,
+        total=unit * body.qty,
+        request_id=request_id,
+    )</code></pre>
+<ul>
+<li><b>Notice:</b> response contract, timeout, health endpoint, request-scoped ID.</li>
+<li><b>Scale failure if skipped:</b> downstream hangs consume capacity; debugging becomes correlation-free; accidental response fields become public API.</li>
+</ul>
+<p class="note"><b>Where this lives:</b> <code>app/routers/price.py</code>.</p>
+</div>
+</details>
+
+<div class="callout senior">
+🎯 <b>Senior interview question:</b> “Why not create the HTTP client inside the route?” Answer: because connection pools should be reused, lifecycle should be explicit, and tests need a replaceable dependency.
+</div>
+
+<div class="quiz">
+<b>Q1.</b> A downstream call hangs for 90 seconds. Which design property matters first?
+<br><button class="reveal">A) timeout</button><button class="reveal">B) response color</button>
+<div class="answer">A. A timeout turns unbounded waiting into a bounded resource cost and allows capacity to recover.</div>
+</div>
+<div class="quiz">
+<b>Q2.</b> Why is 422 appropriate for invalid <code>qty=-1</code>?
+<br><button class="reveal">A) schema validation failed</button><button class="reveal">B) server crashed</button>
+<div class="answer">A. The request reaches the HTTP endpoint but violates its declared input constraints.</div>
+</div>
+<div class="quiz">
+<b>Q3.</b> Why separate response models from internal objects?
+<br><button class="reveal">A) prevent accidental data exposure</button><button class="reveal">B) make Python slower</button>
+<div class="answer">A. Public contracts should expose only fields the client is entitled to receive.</div>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: A production FastAPI endpoint is a contract + lifecycle + dependency + timeout + error boundary.</span></div>
+<div class="callout"><span class="chip take">You can now do: design and implement a typed production-shaped REST endpoint.</span></div>
+
+<div class="bridge"><b>You now have:</b> a typed API that can safely call dependencies. <b>Next problem:</b> network waits should not freeze other requests. That's why the next section exists: async and concurrency.</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- ASYNC -->
+<!-- ============================================================ -->
+
+<section id="async" class="topic">
+<h2>2. Async & concurrency in Python</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#fastapi-build">FastAPI route</a> — server code called for one request.</li>
+<li><a href="#fastapi-build">HTTP client dependency</a> — network I/O may take time.</li>
+<li><a href="#rest">Request lifecycle</a> — many clients can be active at once.</li>
+</ul>
+</div>
+
+<div class="mind">
+<div class="flow">
+<span class="node">Coroutine</span>→<span class="node">await</span>→<span class="node">event loop</span>→<span class="node">task</span>→<span class="node">concurrency limit</span>
+</div>
+</div>
+<div class="legend">
+📖 <b>How to read this mind map:</b> A coroutine describes async work. <code>await</code> gives control back while waiting. The event loop schedules other work. A task schedules a coroutine. A concurrency limit prevents too much simultaneous work.
+</div>
+
+<h3>The four execution models</h3>
+<table>
+<tr><th>Model</th><th>What runs work</th><th>Best for</th><th>Blocked by GIL?</th><th>Overhead</th><th>FastAPI use</th></tr>
+<tr><td>Sync</td><td>one call stack</td><td>simple sequential logic</td><td>yes for Python CPU</td><td>low</td><td>small blocking endpoint</td></tr>
+<tr><td>Threads</td><td>OS threads</td><td>blocking I/O / legacy SDK</td><td>yes for Python CPU</td><td>medium</td><td>bridge blocking libraries</td></tr>
+<tr><td>Processes</td><td>separate processes</td><td>CPU-heavy work</td><td>separate interpreter</td><td>high</td><td>worker architecture</td></tr>
+<tr><td>Async</td><td>event loop tasks</td><td>many I/O waits</td><td>not the point; one loop thread</td><td>low</td><td>HTTP/DB/LLM I/O</td></tr>
+</table>
+
+<div class="box">
+<h4>GIL in one sentence</h4>
+<p>The CPython Global Interpreter Lock generally prevents multiple threads from executing Python bytecode simultaneously in one interpreter.</p>
+<p>It does <b>not</b> mean threads cannot overlap I/O, and it does not mean processes cannot execute Python CPU work in parallel.</p>
+</div>
+
+<h3>Same scenario: fetch 10 URLs</h3>
+<div class="box">
+<p><b>Caller:</b> internal price aggregator.</p>
+<p><b>Input:</b> ten supplier URLs.</p>
+<p><b>Goal:</b> collect all responses.</p>
+<p><b>Rule:</b> each request has a 2-second timeout; at most five suppliers should be contacted simultaneously.</p>
+</div>
+
+<pre><code># sync
+def fetch_all(urls):
+    return [requests.get(u, timeout=2).json() for u in urls]</code></pre>
+<pre><code># async
+async def fetch_all(urls):
+    return await asyncio.gather(
+        *(fetch(u) for u in urls)
+    )</code></pre>
+<pre><code># threads for blocking SDK
+with ThreadPoolExecutor(max_workers=5) as pool:
+    results = list(pool.map(fetch_sync, urls))</code></pre>
+<pre><code># processes for CPU-heavy transformation
+with ProcessPoolExecutor() as pool:
+    results = list(pool.map(cpu_transform, payloads))</code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 850 230">
+<text x="5" y="30" fill="#fff">sync</text><rect x="80" y="14" width="690" height="24" rx="4" fill="#315c91"/>
+<text x="5" y="80" fill="#fff">async</text><rect x="80" y="64" width="180" height="24" rx="4" fill="#46d39a"/>
+<rect x="270" y="64" width="180" height="24" rx="4" fill="#46d39a"/>
+<rect x="460" y="64" width="180" height="24" rx="4" fill="#46d39a"/>
+<text x="5" y="130" fill="#fff">threads</text><rect x="80" y="114" width="300" height="24" rx="4" fill="#b49cff"/>
+<rect x="390" y="114" width="300" height="24" rx="4" fill="#b49cff"/>
+<text x="5" y="180" fill="#fff">processes</text><rect x="80" y="164" width="300" height="24" rx="4" fill="#ffd166"/>
+<rect x="390" y="164" width="300" height="24" rx="4" fill="#ffd166"/>
+</svg>
+<div class="diagram-caption">Illustrative wall-clock timeline: sequential work waits end-to-start; concurrency overlaps independent work.</div>
+</div>
+
+<h3>Decision tree</h3>
+<div class="diagram">
+<svg viewBox="0 0 850 270">
+<text x="20" y="30" fill="#fff">Task?</text>
+<line x1="100" y1="25" x2="250" y2="25" stroke="#6ea8fe"/>
+<text x="270" y="30" fill="#fff">I/O-bound?</text>
+<line x1="370" y1="30" x2="470" y2="30" stroke="#6ea8fe"/>
+<text x="490" y="30" fill="#46d39a">async library → async</text>
+<text x="270" y="80" fill="#fff">blocking library?</text>
+<text x="490" y="80" fill="#b49cff">to_thread / threads</text>
+<text x="270" y="140" fill="#fff">CPU-bound?</text>
+<text x="490" y="140" fill="#ffd166">processes / native code</text>
+<text x="270" y="200" fill="#fff">Need a cap?</text>
+<text x="490" y="200" fill="#46d39a">Semaphore / pool</text>
+</svg>
+</div>
+<div class="legend">
+📖 <b>How to read it:</b> First classify the bottleneck. Network waits favor async; blocking libraries favor a thread bridge; CPU-heavy Python favors processes; any expensive boundary needs a capacity limit.
+</div>
+
+<div id="async-primitives"></div>
+
+<h3>Async primitives — one at a time</h3>
+
+<details open><summary><code>await</code> — wait without blocking the event loop</summary><div>
+<p><b>What:</b> pauses the current coroutine until another awaitable completes.</p>
+<p><b>Why:</b> the loop can run other tasks while this one waits.</p>
+<p><b>How:</b> the coroutine suspends at the await point; the event loop schedules something else.</p>
+<pre><code>async def price():
+    data = await client.get("/price")
+    return data</code></pre>
+<p><b>Scenario:</b> API calls supplier pricing. <b>Use when:</b> the operation is awaitable. <b>Misuse:</b> calling blocking <code>requests.get()</code> inside async code.</p>
+</div></details>
+
+<details><summary><code>asyncio.create_task</code> — start now, keep a handle</summary><div>
+<pre><code>async def save_audit():
+    await audit.write()
+
+task = asyncio.create_task(save_audit())
+result = await do_main_work()
+await task</code></pre>
+<p><b>What:</b> schedules a coroutine immediately and returns a Task.</p>
+<p><b>Why:</b> overlap independent work while retaining cancellation/result control.</p>
+<p><b>Misuse:</b> fire-and-forget without ownership. If the process dies, the work is lost.</p>
+</div></details>
+
+<details><summary><code>asyncio.gather</code> — all results</summary><div>
+<pre><code>results = await asyncio.gather(
+    fetch("A"),
+    fetch("B"),
+    fetch("C"),
+)</code></pre>
+<p><b>What:</b> schedules awaitables concurrently and returns results in input order.</p>
+<p><b>Use:</b> independent operations where all results are required.</p>
+<p><b>Mistake:</b> passing 100,000 tasks without a limit.</p>
+</div></details>
+
+<details><summary><code>gather(..., return_exceptions=True)</code></summary><div>
+<pre><code>results = await asyncio.gather(
+    fetch("A"), fetch("B"),
+    return_exceptions=True,
+)
+for result in results:
+    if isinstance(result, Exception):
+        log_failure(result)</code></pre>
+<p><b>What:</b> returns exceptions as values instead of failing the whole gather.</p>
+<p><b>Use:</b> tolerant batch operations.</p>
+<p><b>Mistake:</b> forgetting to inspect returned exceptions.</p>
+</div></details>
+
+<details><summary><code>asyncio.as_completed</code> — consume fastest first</summary><div>
+<pre><code>tasks = [fetch(u) for u in urls]
+for task in asyncio.as_completed(tasks):
+    result = await task
+    yield result</code></pre>
+<p><b>What:</b> yields awaitables in completion order.</p>
+<p><b>Use:</b> UI/progressive aggregation where fast results are valuable immediately.</p>
+</div></details>
+
+<details><summary><code>asyncio.wait_for</code> — deadline</summary><div>
+<pre><code>try:
+    result = await asyncio.wait_for(
+        fetch(url), timeout=2
+    )
+except asyncio.TimeoutError:
+    return fallback</code></pre>
+<p><b>What:</b> stops waiting after a specified duration.</p>
+<p><b>Use:</b> dependency deadlines.</p>
+</div></details>
+
+<details><summary><code>asyncio.TaskGroup</code> — structured concurrency</summary><div>
+<pre><code>async with asyncio.TaskGroup() as tg:
+    a = tg.create_task(fetch("A"))
+    b = tg.create_task(fetch("B"))
+
+print(a.result(), b.result())</code></pre>
+<p><b>What:</b> owns a group of tasks and coordinates their lifetime.</p>
+<p><b>Why:</b> if one task fails, the group can cancel siblings and propagate failure together.</p>
+<p><b>Use:</b> related concurrent operations where task lifetime must be structured.</p>
+</div></details>
+
+<details><summary><code>asyncio.Semaphore</code> — cap concurrency</summary><div>
+<pre><code>sem = asyncio.Semaphore(5)
+
+async def fetch(url):
+    async with sem:
+        return await client.get(url)</code></pre>
+<p><b>What:</b> permits only N coroutines into a critical region at once.</p>
+<p><b>Use:</b> protect supplier APIs, DB pools and model endpoints.</p>
+</div></details>
+
+<details><summary><code>anyio.to_thread.run_sync</code> — bridge blocking code</summary><div>
+<pre><code>import anyio
+
+result = await anyio.to_thread.run_sync(
+    legacy_sdk.generate,
+    prompt,
+)</code></pre>
+<p><b>What:</b> runs synchronous work in a worker thread.</p>
+<p><b>Use:</b> a third-party SDK has no async API.</p>
+<p><b>Mistake:</b> creating unlimited thread work.</p>
+</div></details>
+
+<h3 id="async-build">Production-shaped concurrency series</h3>
+
+<div class="series"><span class="active">v1 sequential</span>→<span>v2 gather</span>→<span>v3 semaphore</span>→<span>v4 timeout</span>→<span>v5 structured</span></div>
+
+<details open><summary>v1 — sequential</summary><div>
+<p><b>Scenario · File:</b> price aggregator · <code>app/services/suppliers.py</code>.</p>
+<pre><code>async def fetch_all(urls):
+    out = []
+    for url in urls:
+        out.append(await fetch(url))
+    return out</code></pre>
+<p><b>Problem with v1:</b> independent suppliers wait unnecessarily.</p>
+<p class="note"><b>Where:</b> <code>app/services/suppliers.py</code>.</p>
+</div></details>
+
+<details><summary>v2 — gather</summary><div>
+<pre><code>async def fetch_all(urls):
+    return await asyncio.gather(
+<mark>        *(fetch(url) for url in urls)</mark>
+    )</code></pre>
+<p>Added concurrency for independent calls.</p>
+<p class="note"><b>Where:</b> <code>app/services/suppliers.py</code>.</p>
+</div></details>
+
+<details><summary>v3 — semaphore</summary><div>
+<pre><code>sem = asyncio.Semaphore(5)
+
+async def bounded(url):
+<mark>    async with sem:</mark>
+        return await fetch(url)
+
+return await asyncio.gather(
+    *(bounded(u) for u in urls)
+)</code></pre>
+<p>Added a capacity budget.</p>
+<p class="note"><b>Where:</b> <code>app/services/suppliers.py</code>.</p>
+</div></details>
+
+<details><summary>v4 — timeout</summary><div>
+<pre><code>async def bounded(url):
+    async with sem:
+<mark>        async with asyncio.timeout(2):</mark>
+            return await fetch(url)</code></pre>
+<p>Added a deadline so one supplier cannot occupy capacity indefinitely.</p>
+<p class="note"><b>Where:</b> <code>app/services/suppliers.py</code>.</p>
+</div></details>
+
+<details><summary>v5 — structured production version</summary><div>
+<pre><code>async def fetch_all(urls):
+    sem = asyncio.Semaphore(5)
+
+    async def one(url):
+        async with sem:
+            try:
+                async with asyncio.timeout(2):
+                    return await fetch(url)
+            except TimeoutError:
+                return SupplierTimeout(url)
+
+    async with asyncio.TaskGroup() as tg:
+        tasks = [tg.create_task(one(u)) for u in urls]
+
+    return [task.result() for task in tasks]</code></pre>
+<ul><li><b>Notice:</b> bounded work, deadline, owned task lifetime.</li><li><b>Scale failure:</b> without these, downstream overload and stuck requests amplify each other.</li></ul>
+<p class="note"><b>Where:</b> <code>app/services/suppliers.py</code>.</p>
+</div></details>
+
+<div class="quiz">
+<b>Q1.</b> Ten HTTP calls take 1 second each. Why can async finish near 1 second instead of 10?
+<br><button class="reveal">A) I/O waits overlap</button><button class="reveal">B) CPU becomes faster</button>
+<div class="answer">A. While one request waits for network bytes, the event loop can progress another request.</div>
+</div>
+<div class="quiz">
+<b>Q2.</b> Why cap 1000 outbound calls to five?
+<br><button class="reveal">A) protect downstream capacity</button><button class="reveal">B) async requires five</button>
+<div class="answer">A. Concurrency is a resource budget, not a goal in itself.</div>
+</div>
+<div class="quiz">
+<b>Q3.</b> A sync SDK is used in an async route. What is the main danger?
+<br><button class="reveal">A) event-loop blocking</button><button class="reveal">B) JSON syntax</button>
+<div class="answer">A. The blocking SDK occupies the event-loop thread and delays unrelated requests.</div>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: Async is about overlapping waits; senior concurrency adds deadlines, cancellation and bounded capacity.</span></div>
+<div class="callout"><span class="chip take">You can now do: choose and combine Python concurrency primitives based on workload and failure semantics.</span></div>
+
+<div class="bridge"><b>You now have:</b> controlled concurrent I/O. <b>Next problem:</b> users want partial AI output while the model is still generating. That's why the next section exists: SSE.</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SSE -->
+<!-- ============================================================ -->
+
+<section id="sse" class="topic">
+<h2>3. Server-Sent Events</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#rest">HTTP request/response</a>.</li>
+<li><a href="#async">async/await</a> — waiting without blocking the event loop.</li>
+<li><a href="#async-primitives">bounded concurrency</a> — limiting expensive work.</li>
+</ul>
+</div>
+
+<h3>What is a stream?</h3>
+<div class="callout intuition">
+A normal response is like ordering a complete book. A stream is like a radio broadcast: pieces arrive while the source is still producing them.
+</div>
+
+<h3>What is SSE?</h3>
+<div class="box">
+<p><b>What:</b> SSE is a long-lived HTTP response in which the server sends text events to a browser as they become available.</p>
+<p><b>Why:</b> a normal HTTP response waits for the complete body.</p>
+<p><b>When:</b> LLM tokens, progress updates, notifications, live logs.</p>
+<p><b>Where:</b> a streaming route such as <code>app/routers/stream.py</code>.</p>
+<pre><code>data: hello
+
+data: world</code></pre>
+<p><b>Failure mode:</b> users wait for a 20-second AI response instead of seeing the first token quickly.</p>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 850 240">
+<text x="15" y="35" fill="#fff">Normal</text>
+<line x1="100" y1="30" x2="760" y2="30" stroke="#5a6a82"/>
+<rect x="180" y="15" width="430" height="30" rx="6" fill="#315c91"/>
+<text x="280" y="35" fill="#fff">wait → complete response</text>
+<text x="15" y="105" fill="#fff">SSE</text>
+<line x1="100" y1="100" x2="760" y2="100" stroke="#5a6a82"/>
+<rect x="180" y="85" width="90" height="30" rx="6" fill="#46d39a"/><rect x="285" y="85" width="90" height="30" rx="6" fill="#46d39a"/><rect x="390" y="85" width="90" height="30" rx="6" fill="#46d39a"/><rect x="495" y="85" width="90" height="30" rx="6" fill="#46d39a"/>
+<text x="180" y="150" fill="#9eabc0">token 1 → token 2 → token 3 → token 4</text>
+</svg>
+</div>
+<div class="legend">📖 <b>How to read this diagram:</b> The horizontal axis is time. Normal HTTP emits the useful body at the end; SSE emits multiple chunks during the same connection.</div>
+
+<h3>Polling vs long-polling vs SSE vs WebSocket</h3>
+<table>
+<tr><th>Technique</th><th>Latency</th><th>Server cost</th><th>Browser</th><th>Direction</th><th>Pick when</th></tr>
+<tr><td>Polling</td><td>interval-dependent</td><td>high repeated requests</td><td>excellent</td><td>client→server</td><td>simple low-frequency state</td></tr>
+<tr><td>Long-polling</td><td>lower</td><td>open requests</td><td>excellent</td><td>mostly server response</td><td>legacy/simple push</td></tr>
+<tr><td>SSE</td><td>low</td><td>long-lived HTTP</td><td>excellent</td><td>server→client</td><td>token/status streams</td></tr>
+<tr><td>WebSocket</td><td>low</td><td>persistent connection</td><td>excellent</td><td>bidirectional</td><td>interactive two-way realtime</td></tr>
+</table>
+
+<h3>SSE wire format</h3>
+<div class="box">
+<p>Each event is UTF-8 text. Fields end with a newline. A blank line terminates an event.</p>
+<pre><code>event: token\n
+id: 41\n
+retry: 3000\n
+data: {"token":"Hel"}\n
+\n
+event: token\n
+id: 42\n
+data: {"token":"lo"}\n
+\n
+event: done\n
+id: 43\n
+data: {}\n
+\n</code></pre>
+<ul>
+<li><code>event:</code> names the event type.</li>
+<li><code>data:</code> contains the payload.</li>
+<li><code>id:</code> identifies the event for resume.</li>
+<li><code>retry:</code> suggests reconnect delay.</li>
+<li>blank line means “this event is complete”.</li>
+</ul>
+</div>
+
+<h3>Browser first</h3>
+<section id="sse-browser">
+<div class="box">
+<p><b>Scenario:</b> browser asks for an AI answer and wants tokens immediately.</p>
+<pre><code>const es = new EventSource("/v1/chat/stream");
+
+es.addEventListener("token", e => {
+  render(JSON.parse(e.data).token);
+});
+
+es.addEventListener("done", () => es.close());
+es.onerror = () => console.log("reconnecting");</code></pre>
+<p><b>Limitation:</b> standard EventSource does not let you freely set custom Authorization headers.</p>
+<p><b>Alternative:</b> <code>fetch()</code> can expose a ReadableStream and allows request headers.</p>
+<pre><code>const r = await fetch("/stream", {
+  headers: {Authorization: `Bearer ${token}`}
+});
+const reader = r.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const {value, done} = await reader.read();
+  if (done) break;
+  const text = decoder.decode(value, {stream:true});
+  parseSSE(text);
+}</code></pre>
+</div>
+</section>
+
+<div class="callout trap">⚠️ <b>Junior trap:</b> “The server yielded data, therefore the browser displayed it.” Proxies can buffer chunks unless configured for streaming.</div>
+
+<h3 id="sse-build">SSE iterative build</h3>
+
+<div class="series"><span class="active">v1 raw stream</span>→<span>v2 framing</span>→<span>v3 EventSourceResponse</span>→<span>v4 heartbeat/disconnect</span>→<span>v5 production</span></div>
+
+<details open><summary>v1 — fixed strings</summary><div>
+<p><b>Scenario:</b> browser calls <code>GET /demo</code>; server sends three messages.</p>
+<p><b>File:</b> <code>app/routers/stream.py</code>.</p>
+<pre><button class="copy">copy</button><code>async def gen():
+    yield "one"
+    yield "two"
+    yield "three"
+
+@app.get("/demo")
+async def demo():
+    return StreamingResponse(gen())</code></pre>
+<p><b>Problem with v1:</b> there is no SSE content type or event framing, so an SSE client cannot reliably parse it.</p>
+<p><b>Runbook:</b> <code>curl -N http://localhost:8000/demo</code></p>
+<p class="note"><b>Where:</b> <code>app/routers/stream.py</code>.</p>
+</div></details>
+
+<details><summary>v2 — framing and headers</summary><div>
+<pre><button class="copy">copy</button><code>async def gen():
+<mark>    yield "data: one\n\n"</mark>
+<mark>    yield "data: two\n\n"</mark>
+<mark>    yield "data: three\n\n"</mark>
+
+return StreamingResponse(
+    gen(),
+<mark>    media_type="text/event-stream",</mark>
+<mark>    headers={"Cache-Control":"no-cache",
+             "X-Accel-Buffering":"no"},</mark>
+)</code></pre>
+<p><b>Problem with v2:</b> manually building every event is easy to get wrong, and there is no heartbeat.</p>
+<p><b>Runbook:</b> <code>curl -N http://localhost:8000/demo</code></p>
+</div></details>
+
+<details><summary>v3 — EventSourceResponse</summary><div>
+<p><b>What is EventSourceResponse?</b> A response helper that formats yielded event data according to SSE rules.</p>
+<p><b>Why:</b> it removes repetitive framing code.</p>
+<p><b>How:</b> the response adapter converts yielded event objects into SSE fields and keeps the response open.</p>
+<pre><button class="copy">copy</button><code>from sse_starlette.sse import EventSourceResponse
+
+async def gen():
+    yield {"event":"token","data":"one"}
+    yield {"event":"token","data":"two"}
+
+@app.get("/demo")
+async def demo():
+    return EventSourceResponse(gen())</code></pre>
+<p><b>Misuse:</b> assuming this solves proxy buffering, disconnect handling or backpressure. It does not.</p>
+<p><b>Runbook:</b> <code>curl -N http://localhost:8000/demo</code></p>
+</div></details>
+
+<details><summary>v4 — heartbeat + disconnect + cleanup</summary><div>
+<pre><button class="copy">copy</button><code>async def gen(request):
+    try:
+        while True:
+            if await request.is_disconnected():
+                break
+
+            try:
+                item = await asyncio.wait_for(
+                    queue.get(), timeout=15
+                )
+                yield {"event":"token","data":item}
+            except TimeoutError:
+<mark>                yield {"comment":"heartbeat"}</mark>
+    finally:
+        logger.info("stream_closed")</code></pre>
+<p><b>Problem with v4:</b> LLM tokens arrive irregularly; there is no replay and the queue can still grow without a capacity policy.</p>
+<p><b>Runbook:</b> <code>curl -N http://localhost:8000/v1/chat/stream</code></p>
+</div></details>
+
+<details><summary>v5 — production-shaped LLM stream</summary><div>
+<pre><button class="copy">copy</button><code>async def generate_stream(request, llm, last_id=None):
+    queue = asyncio.Queue(maxsize=100)
+
+    async def producer():
+        async for token in llm.stream():
+            await queue.put(token)
+
+    producer_task = asyncio.create_task(producer())
+
+    try:
+        while True:
+            if await request.is_disconnected():
+                producer_task.cancel()
+                break
+
+            try:
+                token = await asyncio.wait_for(
+                    queue.get(), timeout=15
+                )
+                yield {
+                    "id": token.id,
+                    "event": "token",
+                    "data": token.text,
+                }
+            except TimeoutError:
+                yield {"comment":"heartbeat"}
+    finally:
+        producer_task.cancel()
+        logger.info("sse_closed", extra={"last_id":last_id})</code></pre>
+<ul>
+<li><b>Notice:</b> bounded queue, cancellation, heartbeat, IDs, structured logging.</li>
+<li><b>Scale failure:</b> unbounded buffering consumes memory; ignored disconnects waste model tokens; missing IDs prevent reliable resume.</li>
+</ul>
+<p class="note"><b>Where:</b> <code>app/routers/stream.py</code>; model client in <code>app/services/llm.py</code>.</p>
+<p><b>Runbook:</b> <code>curl -N -H "Accept: text/event-stream" http://localhost:8000/v1/chat/stream</code></p>
+</div></details>
+
+<h3>Sequence: SSE request</h3>
+<div class="diagram">
+<svg viewBox="0 0 900 310">
+<text x="40" y="30" fill="#fff">Browser</text><text x="290" y="30" fill="#fff">Proxy</text><text x="520" y="30" fill="#fff">FastAPI</text><text x="740" y="30" fill="#fff">LLM</text>
+<line x1="70" y1="45" x2="70" y2="290" stroke="#555"/><line x1="320" y1="45" x2="320" y2="290" stroke="#555"/><line x1="550" y1="45" x2="550" y2="290" stroke="#555"/><line x1="770" y1="45" x2="770" y2="290" stroke="#555"/>
+<line x1="70" y1="75" x2="550" y2="75" stroke="#6ea8fe"/><text x="140" y="68" fill="#9eabc0">GET stream</text>
+<line x1="550" y1="105" x2="770" y2="105" stroke="#6ea8fe"/><text x="610" y="98" fill="#9eabc0">start generation</text>
+<line x1="770" y1="145" x2="550" y2="145" stroke="#46d39a"/><text x="600" y="138" fill="#9eabc0">token</text>
+<line x1="550" y1="185" x2="70" y2="185" stroke="#46d39a"/><text x="230" y="178" fill="#9eabc0">SSE event</text>
+<line x1="770" y1="225" x2="550" y2="225" stroke="#46d39a"/><line x1="550" y1="260" x2="70" y2="260" stroke="#46d39a"/>
+</svg>
+<div class="diagram-caption">Takeaway: the server keeps one HTTP response open while model output arrives incrementally.</div>
+</div>
+
+<h3>Production checklist</h3>
+<div class="grid">
+<div class="card">Proxy: disable buffering.</div>
+<div class="card">Timeouts: account for long-lived connections.</div>
+<div class="card">Auth: EventSource header limitations need cookie/session or fetch-stream strategies.</div>
+<div class="card">CORS: configure explicit allowed origins.</div>
+<div class="card">Rate limits: streaming connections consume capacity for longer.</div>
+<div class="card">Fan-out: Redis Pub/Sub can distribute transient events.</div>
+<div class="card">Resume: retain event IDs long enough to replay.</div>
+<div class="card">Backpressure: bound queues.</div>
+</div>
+
+<div class="quiz">
+<b>Q1.</b> Production emits the entire answer at once. First suspect?
+<br><button class="reveal">A) proxy buffering</button><button class="reveal">B) Pydantic</button>
+<div class="answer">A. A proxy can collect chunks before forwarding them.</div>
+</div>
+<div class="quiz">
+<b>Q2.</b> Why use Last-Event-ID?
+<br><button class="reveal">A) resume after reconnect</button><button class="reveal">B) authenticate</button>
+<div class="answer">A. Event IDs allow the server to identify and replay missed events when retention exists.</div>
+</div>
+<div class="quiz">
+<b>Q3.</b> Why bound an SSE queue?
+<br><button class="reveal">A) memory safety/backpressure</button><button class="reveal">B) browser styling</button>
+<div class="answer">A. A slow consumer must not create unlimited buffered tokens.</div>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: SSE is HTTP streaming plus framing, reconnect semantics and resource management.</span></div>
+<div class="callout"><span class="chip take">You can now do: stream AI output without confusing streaming with WebSockets.</span></div>
+
+<div class="bridge"><b>You now have:</b> a streaming API. <b>Next problem:</b> the same price request repeatedly hits an 800 ms upstream that rate-limits you. That's why Redis and caching exist.</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- REDIS -->
+<!-- ============================================================ -->
+
+<section id="redis" class="topic">
+<h2>4. Redis and caching</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#fastapi-build">A FastAPI endpoint</a> — the price route.</li>
+<li><a href="#async">async I/O</a> — Redis calls can be awaited.</li>
+<li><a href="#rest">HTTP latency</a> — an upstream request consumes time and capacity.</li>
+</ul>
+</div>
+
+<div class="box">
+<h4>Running scenario</h4>
+<p>Your <code>/price</code> endpoint calls an external pricing API.</p>
+<ul>
+<li>Upstream latency: <b>800 ms</b>.</li>
+<li>Traffic: <b>200 requests/second</b>.</li>
+<li>Upstream rate limit: <b>100 requests/second</b>.</li>
+<li>Same SKUs are requested repeatedly.</li>
+</ul>
+</div>
+
+<h3>What is Redis?</h3>
+<div class="box">
+<p><b>What:</b> Redis is a server that keeps data primarily in memory and exposes fast operations over a network protocol.</p>
+<p><b>Why:</b> an application process cannot safely share one Python dictionary across multiple workers or machines.</p>
+<p><b>When:</b> shared cache, ephemeral state, counters, locks, queues or event streams.</p>
+<p><b>Where:</b> infrastructure layer, accessed by services.</p>
+<p><b>Trade-off:</b> memory is fast but finite; persistence and eviction policy determine durability/retention behavior.</p>
+<p><b>Failure mode:</b> treating Redis as “just a dictionary” can cause data loss assumptions, memory exhaustion or stale data.</p>
+</div>
+
+<h3>The six data structures you actually need</h3>
+<table>
+<tr><th>Type</th><th>Use</th><th>Minimal Redis CLI</th></tr>
+<tr><td>String</td><td>cache value/counter</td><td><code>SET price:A1 19.9<br>GET price:A1</code></td></tr>
+<tr><td>Hash</td><td>object-like fields</td><td><code>HSET user:1 name Ahmad<br>HGET user:1 name</code></td></tr>
+<tr><td>List</td><td>ordered queue-like values</td><td><code>LPUSH jobs A<br>RPOP jobs</code></td></tr>
+<tr><td>Set</td><td>unique membership</td><td><code>SADD tags ai<br>SISMEMBER tags ai</code></td></tr>
+<tr><td>Sorted set</td><td>scores/ranking</td><td><code>ZADD rank 100 A<br>ZRANGE rank 0 -1</code></td></tr>
+<tr><td>Stream</td><td>retained event entries</td><td><code>XADD events * type token<br>XREAD COUNT 10 STREAMS events 0</code></td></tr>
+</table>
+
+<h3>Cache-aside</h3>
+<div class="box">
+<p><b>What:</b> the application checks cache first and loads the source only on a miss.</p>
+<p><b>Why:</b> avoid expensive repeated source calls.</p>
+<p><b>When:</b> reads dominate and stale data can be tolerated within a defined TTL.</p>
+<p><b>Where:</b> service/repository layer, not inside every route.</p>
+<pre><code>cache = get(key)
+if cache is missing:
+    value = load_source()
+    set(key, value)
+return value</code></pre>
+<p><b>Failure mode:</b> no cache means every request consumes upstream latency and rate-limit budget.</p>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 900 220">
+<rect x="20" y="70" width="150" height="55" rx="8" fill="#18304c"/><text x="60" y="103" fill="#fff">API request</text>
+<line x1="170" y1="97" x2="300" y2="97" stroke="#6ea8fe"/>
+<rect x="300" y="70" width="150" height="55" rx="8" fill="#1d4c3b"/><text x="330" y="103" fill="#fff">Redis cache</text>
+<line x1="450" y1="97" x2="590" y2="97" stroke="#6ea8fe"/>
+<rect x="590" y="70" width="150" height="55" rx="8" fill="#4b3320"/><text x="615" y="103" fill="#fff">Upstream API</text>
+<text x="195" y="75" fill="#46d39a">hit → return</text>
+<text x="455" y="145" fill="#ffd166">miss → load → SET</text>
+</svg>
+<div class="diagram-caption">Takeaway: cache hits stop the request before it reaches the expensive source.</div>
+</div>
+
+<h3>Latency and upstream load</h3>
+<div class="diagram">
+<svg viewBox="0 0 850 260">
+<text x="20" y="35" fill="#fff">No cache</text><rect x="150" y="15" width="600" height="35" fill="#ff6b7a"/><text x="410" y="38" fill="#fff">800 ms</text>
+<text x="20" y="95" fill="#fff">Cache hit</text><rect x="150" y="75" width="60" height="35" fill="#46d39a"/><text x="230" y="98" fill="#fff">~few ms</text>
+<text x="20" y="155" fill="#fff">Upstream @ 0% hit</text><rect x="150" y="135" width="600" height="35" fill="#ff6b7a"/><text x="410" y="158" fill="#fff">200 req/s</text>
+<text x="20" y="215" fill="#fff">Upstream @ 90% hit</text><rect x="150" y="195" width="60" height="35" fill="#46d39a"/><text x="230" y="218" fill="#fff">20 req/s</text>
+</svg>
+<div class="diagram-caption">Illustrative: at 90% hit ratio, only about 10% of reads reach the upstream.</div>
+</div>
+
+<h3>Cache iterative build</h3>
+<div class="series"><span class="active">v1 no cache</span>→<span>v2 dict</span>→<span>v3 Redis</span>→<span>v4 stampede protection</span>→<span>v5 production</span></div>
+
+<details open><summary>v1 — no cache</summary><div>
+<p><b>Scenario · File:</b> <code>app/services/pricing.py</code>.</p>
+<pre><code>async def get_price(sku):
+    return await upstream.get(sku)</code></pre>
+<p><b>Problem:</b> 200 req/s reaches an upstream limited to 100 req/s.</p>
+<p class="note"><b>Where:</b> <code>app/services/pricing.py</code>.</p>
+</div></details>
+
+<details><summary>v2 — process-local dict</summary><div>
+<pre><code>cache = {}
+
+async def get_price(sku):
+    if sku in cache:
+        return cache[sku]
+    value = await upstream.get(sku)
+    cache[sku] = value
+    return value</code></pre>
+<p><b>Problem:</b> four Uvicorn workers have four different dictionaries.</p>
+<div class="diagram">
+<svg viewBox="0 0 850 190">
+<rect x="350" y="10" width="150" height="35" rx="7" fill="#315c91"/><text x="375" y="33" fill="#fff">Load balancer</text>
+<line x1="425" y1="45" x2="180" y2="90" stroke="#6ea8fe"/><line x1="425" y1="45" x2="340" y2="90" stroke="#6ea8fe"/><line x1="425" y1="45" x2="510" y2="90" stroke="#6ea8fe"/><line x1="425" y1="45" x2="670" y2="90" stroke="#6ea8fe"/>
+<text x="125" y="120" fill="#fff">worker 1 + dict</text><text x="285" y="120" fill="#fff">worker 2 + dict</text><text x="455" y="120" fill="#fff">worker 3 + dict</text><text x="615" y="120" fill="#fff">worker 4 + dict</text>
+</svg>
+</div>
+<div class="legend">📖 Each process owns separate memory. A cache hit in worker 1 says nothing about worker 2.</div>
+<p class="note"><b>Where:</b> prototype only; do not treat it as shared production cache.</p>
+</div></details>
+
+<details><summary>v3 — Redis cache-aside</summary><div>
+<pre><button class="copy">copy</button><code>import json
+from redis import asyncio as redis
+
+r = redis.from_url(
+    "redis://redis:6379/0",
+    decode_responses=True,
+)
+
+async def get_price(sku):
+    key = f"price:{sku}"
+
+    cached = await r.get(key)
+    if cached is not None:
+        return json.loads(cached)
+
+    value = await upstream.get(sku)
+
+    await r.set(
+        key,
+        json.dumps(value),
+        ex=300,
+    )
+    return value</code></pre>
+<p>One shared Redis server means all workers can see the same cached value. TTL makes the cache temporary rather than eternal.</p>
+<p class="note"><b>Where:</b> <code>app/services/pricing.py</code>; connection creation belongs in application lifecycle.</p>
+</div></details>
+
+<details><summary>v4 — jitter + single-flight</summary><div>
+<pre><button class="copy">copy</button><code>ttl = 300 + random.randint(0, 60)
+lock_key = f"lock:{key}"
+
+owner = uuid.uuid4().hex
+acquired = await r.set(
+    lock_key, owner, nx=True, ex=10
+)
+
+if acquired:
+    try:
+        value = await upstream.get(sku)
+        await r.set(key, json.dumps(value), ex=ttl)
+        return value
+    finally:
+        # production release should verify owner
+        await release_lock(lock_key, owner)
+
+await asyncio.sleep(.05)
+return await get_price(sku)</code></pre>
+<p><b>Problem fixed:</b> many simultaneous misses no longer all hammer the upstream.</p>
+<p class="note"><b>Where:</b> <code>app/services/pricing.py</code>.</p>
+</div></details>
+
+<details><summary>Senior · v5 — pooled client + metrics + invalidation</summary><div>
+<pre><button class="copy">copy</button><code>REDIS_KEY = "price:{sku}:{region}"
+
+async def get_price(sku, region):
+    key = REDIS_KEY.format(sku=sku, region=region)
+
+    value = await redis.get(key)
+    if value:
+        metrics.cache_hits.inc()
+        return json.loads(value)
+
+    metrics.cache_misses.inc()
+
+    try:
+        value = await load_with_single_flight(
+            key,
+            lambda: upstream.get(sku, region),
+        )
+        ttl = 300 + random.randint(0, 60)
+        await redis.set(key, json.dumps(value), ex=ttl)
+        return value
+    except RedisError:
+        # Cache failure should not necessarily
+        # make the business dependency unavailable.
+        return await upstream.get(sku, region)
+
+async def update_price(sku, region, value):
+    await upstream.update(sku, region, value)
+    await redis.delete(
+        REDIS_KEY.format(sku=sku, region=region)
+    )</code></pre>
+<ul>
+<li><b>Notice:</b> structured key naming, hit/miss metrics, jitter, invalidation, graceful cache fallback.</li>
+<li><b>Scale failure:</b> unclear keys cause collisions; no metrics hides hot keys; no fallback makes a cache outage an application outage.</li>
+</ul>
+<p class="note"><b>Where:</b> <code>app/services/pricing.py</code>; Redis pool in <code>app/lifecycle.py</code>.</p>
+</div></details>
+
+<div class="snapshot">
+<div class="snapbar"><b>redis-cli</b><span class="ok">connected</span></div>
+<div>127.0.0.1:6379&gt; INFO stats</div>
+<div>keyspace_hits:92000</div>
+<div>keyspace_misses:8000</div>
+<div class="ok">hit ratio = 92%</div>
+<div>127.0.0.1:6379&gt; MONITOR</div>
+<div>... GET price:A10001:EU</div>
+<div>... SET price:A10001:EU "{...}" EX 327</div>
+</div>
+
+<div class="quiz">
+<b>Q1.</b> Why does a Python dict fail as a shared cache with four workers?
+<br><button class="reveal">A) each process has separate memory</button><button class="reveal">B) dictionaries cannot store strings</button>
+<div class="answer">A. Separate processes do not share ordinary Python heap memory.</div>
+</div>
+<div class="quiz">
+<b>Q2.</b> Why jitter TTLs?
+<br><button class="reveal">A) avoid synchronized expiry</button><button class="reveal">B) improve JSON parsing</button>
+<div class="answer">A. Randomized expiry spreads cache misses over time.</div>
+</div>
+<div class="quiz">
+<b>Q3.</b> Should a cache outage always make price lookup fail?
+<br><button class="reveal">A) not necessarily; fallback may be valid</button><button class="reveal">B) yes, Redis is the source of truth</button>
+<div class="answer">A. If Redis is a cache rather than the source of truth, the upstream may remain usable.</div>
+</div>
+
+<div class="callout senior">
+🎯 <b>Senior section — two patterns to ship:</b>
+<pre><code># 1. Cache key contract
+def price_key(sku, region):
+    # Version prevents old serialized values
+    # from colliding with a future schema.
+    return f"price:v2:{region}:{sku}"
+
+# 2. Cache metrics
+if cached is not None:
+    metrics.cache_hit.labels(
+        region=region
+    ).inc()
+else:
+    metrics.cache_miss.labels(
+        region=region
+    ).inc()</code></pre>
+<ul><li><b>Notice:</b> keys are API contracts inside infrastructure.</li><li><b>Scale failure:</b> changing serialization without versioning can make old cached values unreadable.</li></ul>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: caching trades freshness and complexity for lower latency and upstream load.</span></div>
+<div class="callout"><span class="chip take">You can now do: design cache-aside, TTL, stampede protection and shared Redis state.</span></div>
+
+<div class="bridge"><b>You now have:</b> a fast shared cache. <b>Next problem:</b> the application and Redis must run identically on another machine. That's why the next section exists: Docker.</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- DOCKER -->
+<!-- ============================================================ -->
+
+<section id="docker" class="topic">
+<h2>5. Docker</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#fastapi-build">The price API</a> — our application process.</li>
+<li><a href="#cache">Redis</a> — an external service.</li>
+<li><a href="#async">processes and resource limits</a> — the runtime has finite capacity.</li>
+</ul>
+</div>
+
+<div class="mind">
+<div class="flow">
+<span class="node">Dockerfile</span>→<span class="node">Build context</span>→<span class="node">Layers</span>→
+<span class="node">Image</span>→<span class="node">Container</span>→<span class="node">Process</span>
+</div>
+</div>
+<div class="legend">
+📖 <b>How to read this map:</b> Dockerfile describes construction. Build context is the files available to the builder. Each instruction can create a layer. The image is the packaged result. A container is one runtime instance of that image. The process is the actual application program.
+</div>
+
+<details open>
+<summary>What is an image?</summary>
+<div>
+<p><b>What:</b> an image is an immutable packaged filesystem and metadata used to start containers.</p>
+<p><b>Why:</b> “install Python, install dependencies, copy app” should be reproducible.</p>
+<p><b>When:</b> build once, run in many environments.</p>
+<p><b>Where:</b> Dockerfile and registry.</p>
+<p><b>Failure mode:</b> machines drift because each developer installs dependencies differently.</p>
+</div>
+</details>
+
+<details>
+<summary>What is a container?</summary>
+<div>
+<p><b>What:</b> a container is a running process isolated using Linux kernel features and configured from an image.</p>
+<p><b>Why:</b> isolate filesystem, process and network assumptions.</p>
+<p><b>When:</b> run the application consistently.</p>
+<p><b>Where:</b> local development, CI, deployment.</p>
+<p><b>Failure mode:</b> without isolation, runtime assumptions leak between applications.</p>
+</div>
+</details>
+
+<h3>Dockerfile from scratch</h3>
+<table>
+<tr><th>Line</th><th>What it does</th><th>Why</th></tr>
+<tr><td>FROM</td><td>chooses base image</td><td>starting filesystem/runtime</td></tr>
+<tr><td>WORKDIR</td><td>sets working directory</td><td>predictable paths</td></tr>
+<tr><td>COPY</td><td>adds files</td><td>application enters image</td></tr>
+<tr><td>RUN</td><td>executes build command</td><td>install dependencies</td></tr>
+<tr><td>USER</td><td>selects runtime identity</td><td>least privilege</td></tr>
+<tr><td>HEALTHCHECK</td><td>defines health probe</td><td>orchestrator signal</td></tr>
+<tr><td>CMD</td><td>default process</td><td>starts application</td></tr>
+</table>
+
+<h3 id="docker-build">Scenario: ship the price service</h3>
+<div class="series"><span class="active">v1 base</span>→<span>v2 cache-friendly layers</span>→<span>v3 multi-stage</span>→<span>v4 non-root + health</span>→<span>v5 slim runtime</span></div>
+
+<details open><summary>v1 — base image</summary><div>
+<p><b>Scenario · File:</b> package FastAPI price API · <code>Dockerfile</code>.</p>
+<pre><code>FROM python:3.12
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+CMD ["uvicorn","app.main:app","--host","0.0.0.0"]</code></pre>
+<p><b>Problem:</b> every source change can invalidate dependency installation, and the image contains more than necessary.</p>
+<p class="note"><b>Where:</b> repository root, <code>Dockerfile</code>.</p>
+</div></details>
+
+<details><summary>v2 — dependency layer cache</summary><div>
+<pre><code>FROM python:3.12
+WORKDIR /app
+<mark>COPY requirements.txt .</mark>
+<mark>RUN pip install --no-cache-dir -r requirements.txt</mark>
+<mark>COPY app ./app</mark>
+CMD ["uvicorn","app.main:app","--host","0.0.0.0"]</code></pre>
+<p><b>Changed:</b> dependencies are copied and installed before application source, so source edits can reuse the expensive dependency layer.</p>
+<p class="note"><b>Where:</b> <code>Dockerfile</code>.</p>
+</div></details>
+
+<details><summary>v3 — multi-stage</summary><div>
+<pre><code>FROM python:3.12-slim AS builder
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --prefix=/install --no-cache-dir -r requirements.txt
+
+FROM python:3.12-slim
+WORKDIR /app
+<mark>COPY --from=builder /install /usr/local</mark>
+COPY app ./app
+CMD ["uvicorn","app.main:app","--host","0.0.0.0"]</code></pre>
+<p><b>Changed:</b> build-only filesystem is separated from runtime.</p>
+<p class="note"><b>Where:</b> <code>Dockerfile</code>.</p>
+</div></details>
+
+<details><summary>v4 — non-root + healthcheck</summary><div>
+<pre><code>...
+COPY app ./app
+<mark>RUN useradd --create-home appuser \</mark>
+<mark>    && chown -R appuser /app</mark>
+<mark>USER appuser</mark>
+<mark>HEALTHCHECK CMD python -c \</mark>
+<mark> "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"</mark>
+CMD ["uvicorn","app.main:app","--host","0.0.0.0"]</code></pre>
+<p><b>Changed:</b> least privilege and explicit health signal.</p>
+<p class="note"><b>Where:</b> <code>Dockerfile</code>.</p>
+</div></details>
+
+<details><summary>Senior · v5 — runtime hardening</summary><div>
+<pre><code>FROM python:3.12-slim AS builder
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install \
+    --prefix=/install \
+    --no-cache-dir \
+    -r requirements.txt
+
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+COPY --from=builder /install /usr/local
+COPY app ./app
+
+RUN useradd --create-home appuser \
+    && chown -R appuser /app
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"
+
+CMD ["uvicorn","app.main:app",
+     "--host","0.0.0.0","--port","8000"]</code></pre>
+<ul><li><b>Notice:</b> small base, multi-stage dependency installation, non-root, healthcheck, unbuffered logs.</li><li><b>Scale failure:</b> oversized images slow deployment and increase attack surface.</li></ul>
+<p class="note"><b>Where:</b> repository root, <code>Dockerfile</code>.</p>
+</div></details>
+
+<h3>.dockerignore</h3>
+<pre><code>.git
+.venv
+__pycache__
+.pytest_cache
+.env
+*.log
+dist</code></pre>
+
+<div class="snapshot">
+<div class="snapbar"><b>docker build</b></div>
+<div>$ docker build -t price-api:dev .</div>
+<div>STEP 3/8 : RUN pip install ... <span class="ok">CACHED</span></div>
+<div>STEP 6/8 : COPY app ./app</div>
+<div>Successfully tagged price-api:dev</div>
+<div>SIZE: 148MB</div>
+</div>
+
+<div class="snapshot">
+<div class="snapbar"><b>docker images</b></div>
+<div>REPOSITORY&nbsp;&nbsp;&nbsp;&nbsp;TAG&nbsp;&nbsp;&nbsp;&nbsp;SIZE</div>
+<div>price-api&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev&nbsp;&nbsp;&nbsp;&nbsp;148MB</div>
+</div>
+
+<div class="quiz">
+<b>Q1.</b> Why copy requirements before source?
+<br><button class="reveal">A) build cache reuse</button><button class="reveal">B) HTTP routing</button>
+<div class="answer">A. Dependency installation can remain cached across source-only changes.</div>
+</div>
+<div class="quiz">
+<b>Q2.</b> Why non-root?
+<br><button class="reveal">A) reduce privilege</button><button class="reveal">B) increase CPU</button>
+<div class="answer">A. A compromised process has a smaller privilege boundary.</div>
+</div>
+<div class="quiz">
+<b>Q3.</b> Why multi-stage?
+<br><button class="reveal">A) separate build and runtime concerns</button><button class="reveal">B) enable REST</button>
+<div class="answer">A. The runtime image need not contain every tool used during building.</div>
+</div>
+
+<div class="callout senior">
+🎯 <b>Senior snippets</b>
+<pre><code># Debug a running container
+docker logs price-api
+docker exec -it price-api sh
+docker inspect price-api
+
+# The interview insight:
+# inspect runtime reality rather than guessing
+# from the Dockerfile.</code></pre>
+<ul><li><b>Notice:</b> logs, process shell and metadata are distinct debugging tools.</li><li><b>Scale failure:</b> guessing at production state wastes incident time.</li></ul>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: Docker packages the runtime, not merely the source code.</span></div>
+<div class="callout"><span class="chip take">You can now do: write and harden a Python Dockerfile.</span></div>
+
+<div class="bridge"><b>You now have:</b> one reproducible container. <b>Next problem:</b> the price service needs Redis and a reverse proxy too. That's why Compose exists.</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- COMPOSE -->
+<!-- ============================================================ -->
+
+<section id="compose" class="topic">
+<h2>6. Docker Compose</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#docker">Image vs container</a>.</li>
+<li><a href="#cache">Redis</a>.</li>
+<li><a href="#docker-build">Dockerfile</a>.</li>
+</ul>
+</div>
+
+<div class="mind">
+<div class="flow">
+<span class="node">api</span>↔<span class="node">Redis</span>
+<br><span class="node">nginx</span>→<span class="node">api</span>
+<br><span class="node">network</span>·<span class="node">volume</span>·<span class="node">environment</span>
+</div>
+</div>
+<div class="legend">
+📖 <b>How to read:</b> Compose defines multiple services. Services share a Compose network and can address each other by service name. Volumes persist data beyond container recreation. Environment variables configure behavior without baking secrets into images.
+</div>
+
+<div class="box">
+<h4>Scenario</h4>
+<p>Run <code>price-api</code>, Redis and nginx locally. The browser accesses nginx on port 8080. nginx forwards to API. API calls Redis using <code>redis:6379</code>.</p>
+</div>
+
+<div class="series"><span class="active">v1 API</span>→<span>v2 + Redis</span>→<span>v3 health gate</span>→<span>v4 dev overlay + secrets</span></div>
+
+<details open><summary>v1 — one service</summary><div>
+<pre><code>services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"</code></pre>
+<p><b>Problem:</b> Redis does not exist in the local system.</p>
+<p class="note"><b>Where:</b> <code>compose.yml</code>.</p>
+</div></details>
+
+<details><summary>v2 — add Redis</summary><div>
+<pre><code>services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+<mark>  redis:</mark>
+<mark>    image: redis:7-alpine</mark></code></pre>
+<p>Inside the network, the API uses <code>redis://redis:6379/0</code>. <code>localhost</code> would mean the API container itself.</p>
+<p class="note"><b>Where:</b> <code>compose.yml</code>.</p>
+</div></details>
+
+<details><summary>v3 — healthcheck gate</summary><div>
+<pre><code>redis:
+  image: redis:7-alpine
+<mark>  healthcheck:</mark>
+<mark>    test: ["CMD","redis-cli","ping"]</mark>
+
+api:
+  build: .
+  depends_on:
+    redis:
+<mark>      condition: service_healthy</mark></code></pre>
+<p><b>What is <code>depends_on: condition: service_healthy</code>?</b> It tells Compose that the dependent service should wait for the dependency's health check to pass, rather than merely waiting for the container process to start.</p>
+<p><b>Why:</b> process start and service readiness are different events.</p>
+<p><b>Misuse:</b> treating this as a replacement for runtime retry logic; networks can still fail after startup.</p>
+<p class="note"><b>Where:</b> <code>compose.yml</code>.</p>
+</div></details>
+
+<details><summary>Senior · v4 — dev overlay + secret discipline</summary><div>
+<pre><code>services:
+  api:
+    build: .
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    profiles: ["dev"]
+    volumes:
+      - ./app:/app/app
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0 --reload
+
+  redis:
+    image: redis:7-alpine
+
+# Do not put production credentials in git.
+# Use your deployment platform's secret store.</code></pre>
+<ul><li><b>Notice:</b> development-only hot reload is isolated from production behavior.</li><li><b>Scale failure:</b> local bind mounts and dev commands are unsafe assumptions for production.</li></ul>
+<p class="note"><b>Where:</b> <code>compose.yml</code> or a separate dev override.</p>
+</div></details>
+
+<div class="snapshot">
+<div class="snapbar"><b>docker compose up</b></div>
+<div>redis-1 | Ready to accept connections</div>
+<div>api-1 | Application startup complete</div>
+<div class="ok">api-1 | GET /health 200</div>
+</div>
+
+<div class="quiz">
+<b>Q1.</b> Why is <code>redis</code> used instead of <code>localhost</code>?
+<br><button class="reveal">A) service DNS name</button><button class="reveal">B) Redis only accepts names</button>
+<div class="answer">A. Compose gives services network identities based on service names.</div>
+</div>
+<div class="quiz">
+<b>Q2.</b> Why healthcheck-gated startup?
+<br><button class="reveal">A) start order ≠ readiness</button><button class="reveal">B) improve JSON</button>
+<div class="answer">A. A process can exist before the service can accept meaningful requests.</div>
+</div>
+<div class="quiz">
+<b>Q3.</b> Should production credentials live in Compose YAML committed to git?
+<br><button class="reveal">A) no</button><button class="reveal">B) yes</button>
+<div class="answer">A. Credentials belong in protected secret-management mechanisms.</div>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: Compose describes a small distributed system: services, networking, health, configuration and persistence.</span></div>
+<div class="callout"><span class="chip take">You can now do: run API + Redis as one reproducible local stack.</span></div>
+
+<div class="bridge"><b>You now have:</b> a reproducible multi-service environment. <b>Next problem:</b> every pull request must prove the same system still works. That's why CI/CD exists.</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- CICD -->
+<!-- ============================================================ -->
+
+<section id="cicd" class="topic">
+<h2>7. CI/CD and GitHub Actions</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#docker-build">Docker build</a> — produces an application image.</li>
+<li><a href="#compose">Compose</a> — proves services can run together locally.</li>
+<li><a href="#fastapi-build">Tests</a> — verify API behavior.</li>
+</ul>
+</div>
+
+<div class="mind">
+<div class="flow">
+<span class="node">Push / PR</span>→<span class="node">Trigger</span>→<span class="node">Runner</span>→
+<span class="node">Lint</span>→<span class="node">Test</span>→<span class="node">Build</span>→<span class="node">Push image</span>→<span class="node">Deploy gate</span>
+</div>
+</div>
+<div class="legend">
+📖 <b>How to read:</b> A developer pushes code. GitHub triggers a workflow. A temporary runner executes jobs. Jobs run steps. The image is an artifact. Production deployment is a separate authorized promotion step.
+</div>
+
+<div class="box">
+<p><b>What is CI?</b> Continuous Integration automatically validates changes.</p>
+<p><b>What is CD?</b> Continuous Delivery/Deployment automates moving a validated artifact toward environments.</p>
+<p><b>Why?</b> Humans should not manually remember the same validation sequence on every change.</p>
+<p><b>Failure mode:</b> “it worked locally” becomes the primary quality gate.</p>
+</div>
+
+<h3>Snapshot 1 — Actions tab</h3>
+<div class="snapshot">
+<div class="snapbar"><b>GitHub · Actions</b></div>
+<div><span class="ok">✓</span> CI / main&nbsp;&nbsp; 2m 18s</div>
+<div><span class="wait">◌</span> CI / feature/cache&nbsp;&nbsp; 41s</div>
+<div><span class="bad">✕</span> CI / feature/api&nbsp;&nbsp; 1m 03s</div>
+<p class="small">Senior notice: repeated dependency installation creates avoidable CI time.</p>
+</div>
+
+<h3>Snapshot 2 — run graph</h3>
+<div class="snapshot">
+<div class="flow">
+<span class="node ok">lint ✓ 14s</span>→
+<span class="node ok">test ✓ 38s</span>→
+<span class="node ok">build ✓ 52s</span>→
+<span class="node ok">push ✓ 20s</span>→
+<span class="node wait">deploy ⏸ reviewer</span>
+</div>
+<p class="small">Senior notice: deployment is gated, not automatically equivalent to merge.</p>
+</div>
+
+<h3>Snapshot 3 — logs</h3>
+<div class="snapshot">
+<div>Restore dependencies ... <span class="ok">cache hit</span></div>
+<div>pytest ... <span class="ok">127 passed</span></div>
+<div>docker build ... <span class="ok">success</span></div>
+<div>docker push ... <span class="ok">ghcr.io/you/price:sha-abcdef</span></div>
+</div>
+
+<h3>Snapshot 4 — secrets</h3>
+<div class="snapshot">
+<div class="snapbar"><b>Settings → Secrets and variables → Actions</b></div>
+<div>MODEL_API_KEY&nbsp;&nbsp;••••••••••</div>
+<div>DEPLOY_TOKEN&nbsp;&nbsp;••••••••••</div>
+<p class="small">Senior notice: secret values are not committed or echoed into logs.</p>
+</div>
+
+<h3>Snapshot 5 — environment gate</h3>
+<div class="snapshot">
+<div class="snapbar"><b>Environments → production</b></div>
+<div>Required reviewers: 2</div>
+<div>Deployment branch: main</div>
+<div class="wait">Waiting for approval</div>
+</div>
+
+<h3>Snapshot 6 — branch protection</h3>
+<div class="snapshot">
+<div>☑ Require pull request</div>
+<div>☑ Require status checks</div>
+<div>☑ Require branch up to date</div>
+</div>
+
+<h3>Snapshot 7 — PR checks</h3>
+<div class="snapshot">
+<div class="ok"><b>✓ All checks have passed</b></div>
+<div>lint · tests · image-build</div>
+</div>
+
+<h3>YAML iterative build</h3>
+<div class="series"><span class="active">v1 test</span>→<span>v2 cache</span>→<span>v3 matrix</span>→<span>v4 GHCR</span>→<span>v5 deploy gate</span></div>
+
+<details open><summary>v1 — test</summary><div>
+<p><b>Scenario:</b> every PR must run tests · <code>.github/workflows/ci.yml</code>.</p>
+<pre><code>name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pytest</code></pre>
+<p><b>Problem:</b> dependencies reinstall every time.</p>
+</div></details>
+
+<details><summary>v2 — dependency cache</summary><div>
+<pre><code>- uses: actions/setup-python@v5
+  with:
+    python-version: "3.12"
+<mark>    cache: pip</mark></code></pre>
+<p><b>Changed:</b> pip's dependency cache can be restored between compatible runs.</p>
+</div></details>
+
+<details><summary>v3 — matrix</summary><div>
+<pre><code>strategy:
+  matrix:
+<mark>    python: ["3.11","3.12","3.13"]</mark>
+
+steps:
+  - uses: actions/setup-python@v5
+    with:
+<mark>      python-version: ${{ matrix.python }}</mark>
+      cache: pip</code></pre>
+<p><b>Changed:</b> compatibility is checked across supported Python versions.</p>
+</div></details>
+
+<details><summary>v4 — build and push immutable image</summary><div>
+<pre><code>- uses: docker/login-action@v3
+  with:
+    registry: ghcr.io
+    username: ${{ github.actor }}
+    password: ${{ secrets.GITHUB_TOKEN }}
+
+- uses: docker/build-push-action@v6
+  with:
+    push: true
+<mark>    tags: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}</mark></code></pre>
+<p><b>Changed:</b> the artifact is identified by the commit SHA.</p>
+</div></details>
+
+<details><summary>Senior · v5 — deployment gate</summary><div>
+<pre><code>deploy:
+  needs: [test, build]
+  if: github.ref == 'refs/heads/main'
+  runs-on: ubuntu-latest
+
+  environment:
+    name: production
+
+  steps:
+    - name: Deploy immutable artifact
+      run: |
+        ./deploy.sh \
+        ghcr.io/${{ github.repository }}:sha-${{ github.sha }}</code></pre>
+<ul><li><b>Notice:</b> dependency graph, immutable artifact, protected environment.</li><li><b>Scale failure:</b> mutable <code>latest</code> tags make rollback and provenance ambiguous.</li></ul>
+</div></details>
+
+<div class="diagram">
+<svg viewBox="0 0 900 170">
+<defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#6ea8fe"/></marker></defs>
+<rect x="10" y="55" width="100" height="40" rx="7" fill="#18304c"/><text x="38" y="80" fill="#fff">push</text>
+<line x1="110" y1="75" x2="200" y2="75" stroke="#6ea8fe" marker-end="url(#arrow2)"/>
+<rect x="200" y="55" width="120" height="40" rx="7" fill="#18304c"/><text x="222" y="80" fill="#fff">workflow</text>
+<line x1="320" y1="75" x2="410" y2="75" stroke="#6ea8fe" marker-end="url(#arrow2)"/>
+<rect x="410" y="55" width="100" height="40" rx="7" fill="#18304c"/><text x="435" y="80" fill="#fff">jobs</text>
+<line x1="510" y1="75" x2="600" y2="75" stroke="#6ea8fe" marker-end="url(#arrow2)"/>
+<rect x="600" y="55" width="120" height="40" rx="7" fill="#18304c"/><text x="618" y="80" fill="#fff">artifact</text>
+<line x1="720" y1="75" x2="820" y2="75" stroke="#6ea8fe" marker-end="url(#arrow2)"/>
+<text x="825" y="80" fill="#fff">PR</text>
+</svg>
+<div class="diagram-caption">Takeaway: automation converts a source change into a visible, reviewable quality signal and a traceable artifact.</div>
+</div>
+
+<div class="quiz">
+<b>Q1.</b> Why use SHA tags instead of only <code>:latest</code>?
+<br><button class="reveal">A) provenance and rollback</button><button class="reveal">B) smaller image</button>
+<div class="answer">A. A SHA tag maps the artifact to exact source history.</div>
+</div>
+<div class="quiz">
+<b>Q2.</b> Why separate build from deployment approval?
+<br><button class="reveal">A) deployment is an authorization decision</button><button class="reveal">B) builds cannot run automatically</button>
+<div class="answer">A. A tested artifact can be promoted only after environment-specific authorization.</div>
+</div>
+<div class="quiz">
+<b>Q3.</b> What is the senior signal in a CI log?
+<br><button class="reveal">A) obvious failure location and reproducible artifact</button><button class="reveal">B) maximum log length</button>
+<div class="answer">A. Useful CI reduces diagnosis time and establishes provenance.</div>
+</div>
+
+<div class="callout senior">
+🎯 <b>Senior section: two production-shaped snippets</b>
+<pre><code># Concurrency control for duplicate deploys
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+# Why:
+# two production deployments should not
+# silently race each other.</code></pre>
+<pre><code># Separate test and build
+build:
+  needs: test
+
+# Why:
+# don't publish an artifact if the
+# quality gate failed.</code></pre>
+<ul><li><b>Notice:</b> delivery itself has concurrency and dependency semantics.</li><li><b>Scale failure:</b> two simultaneous deploys can leave the environment on an unexpected version.</li></ul>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: CI/CD is a controlled graph from source change to verified, traceable deployment.</span></div>
+<div class="callout"><span class="chip take">You can now do: explain runners, jobs, caching, matrices, GHCR, secrets and environment gates.</span></div>
+
+<div class="bridge"><b>You now have:</b> automated validation and artifact delivery. <b>Next problem:</b> connect every piece into one AI backend. That's why the capstone exists.</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- CAPSTONE -->
+<!-- ============================================================ -->
+
+<section id="capstone" class="topic">
+<h2>8. Capstone: production-shaped streaming price/AI service</h2>
+
+<div class="prereq">
+<b>Before you start, you must know:</b>
+<ul>
+<li><a href="#fastapi-build">FastAPI + Pydantic contracts</a>.</li>
+<li><a href="#async-build">bounded async concurrency and timeouts</a>.</li>
+<li><a href="#sse-build">SSE framing, disconnects and bounded queues</a>.</li>
+<li><a href="#cache">Redis cache-aside and stampede protection</a>.</li>
+<li><a href="#docker-build">Docker image construction</a>.</li>
+<li><a href="#compose">Compose service networking</a>.</li>
+<li><a href="#cicd">CI/CD artifact promotion</a>.</li>
+</ul>
+</div>
+
+<div class="box">
+<h3>Final scenario</h3>
+<p><b>Caller:</b> web application.</p>
+<p><b>Input:</b> <code>{"sku":"A10001","qty":3}</code>.</p>
+<p><b>Backend:</b> validates input, checks Redis, calls pricing upstream if necessary, then optionally streams an AI explanation.</p>
+<p><b>Rules:</b> upstream timeout 5 s; cache TTL around 5 minutes with jitter; bounded concurrency; SSE heartbeat; graceful disconnect; immutable container image.</p>
+</div>
+
+<div class="mind">
+<div class="flow">
+<span class="node">Browser</span>→<span class="node">FastAPI</span>→<span class="node">Pydantic</span>→<span class="node">Redis</span>→<span class="node">Upstream</span>
+</div>
+<div class="flow">
+<span class="node">Upstream result</span>→<span class="node">AI explanation</span>→<span class="node">SSE</span>→<span class="node">Browser</span>
+</div>
+<div class="flow">
+<span class="node">Docker</span>→<span class="node">Compose</span>→<span class="node">CI</span>→<span class="node">GHCR</span>→<span class="node">Production</span>
+</div>
+</div>
+
+<div class="legend">
+📖 <b>How to read the capstone map:</b>
+The first path is synchronous request data flow. The second path is incremental response flow. The third path is deployment flow. They are connected but should not be collapsed into one giant function.
+</div>
+
+<h3>Capstone build</h3>
+<div class="series"><span class="active">v1 contract</span>→<span>v2 async upstream</span>→<span>v3 Redis</span>→<span>v4 SSE</span>→<span>v5 Docker</span>→<span>v6 CI/CD</span></div>
+
+<details open><summary>v1 — contract</summary><div>
+<p><b>File:</b> <code>app/schemas/price.py</code>.</p>
+<pre><code>class PriceRequest(BaseModel):
+    sku: str = Field(min_length=6, max_length=6)
+    qty: int = Field(gt=0)
+
+class PriceResponse(BaseModel):
+    sku: str
+    total: float</code></pre>
+<p><b>Why:</b> all later infrastructure depends on a stable application boundary.</p>
+<p class="note"><b>Where:</b> <code>app/schemas/price.py</code>.</p>
+</div></details>
+
+<details><summary>v2 — async upstream</summary><div>
+<p><b>File:</b> <code>app/services/pricing.py</code>.</p>
+<pre><code>async def get_price(sku):
+    try:
+        async with asyncio.timeout(5):
+            return await pricing_client.get(sku)
+    except TimeoutError:
+        raise PricingUnavailable()</code></pre>
+<p><b>Why:</b> the upstream is an I/O dependency and must have a deadline.</p>
+<p class="note"><b>Where:</b> <code>app/services/pricing.py</code>.</p>
+</div></details>
+
+<details><summary>v3 — shared Redis cache</summary><div>
+<p><b>File:</b> <code>app/services/pricing.py</code>.</p>
+<pre><code>async def get_price(sku):
+    key = f"price:v1:{sku}"
+    cached = await redis.get(key)
+
+    if cached:
+        return json.loads(cached)
+
+    value = await load_with_single_flight(
+        key,
+        lambda: pricing_client.get(sku)
+    )
+
+    await redis.set(
+        key,
+        json.dumps(value),
+        ex=300 + random.randint(0,60)
+    )
+    return value</code></pre>
+<p><b>Why:</b> shared cache reduces upstream calls while the lock/jitter reduce stampedes.</p>
+<p class="note"><b>Where:</b> <code>app/services/pricing.py</code>.</p>
+</div></details>
+
+<details><summary>v4 — SSE AI explanation</summary><div>
+<p><b>File:</b> <code>app/routers/stream.py</code>.</p>
+<pre><code>@router.get("/explain")
+async def explain(
+    sku: str,
+    request: Request,
+):
+    async def stream():
+        async for token in llm.stream(
+            f"Explain price for {sku}"
+        ):
+            if await request.is_disconnected():
+                break
+            yield {
+                "event":"token",
+                "data":token,
+            }
+
+    return EventSourceResponse(stream())</code></pre>
+<p><b>Why:</b> the browser receives model output while generation continues.</p>
+<p class="note"><b>Where:</b> <code>app/routers/stream.py</code>.</p>
+</div></details>
+
+<details><summary>v5 — runtime</summary><div>
+<p><b>Files:</b> <code>Dockerfile</code>, <code>compose.yml</code>.</p>
+<pre><code>services:
+  api:
+    build: .
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]</code></pre>
+<p><b>Why:</b> local runtime now matches the architecture: API + shared Redis.</p>
+<p class="note"><b>Where:</b> repository root infrastructure files.</p>
+</div></details>
+
+<details><summary>Senior · v6 — delivery</summary><div>
+<pre><code>jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: pytest
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./deploy.sh ghcr.io/${{ github.repository }}:sha-${{ github.sha }}</code></pre>
+<ul>
+<li><b>Notice:</b> test before build, immutable SHA image, production environment gate.</li>
+<li><b>Scale failure:</b> deploying directly from a mutable source reference makes rollback and auditability weaker.</li>
+</ul>
+<p class="note"><b>Where:</b> <code>.github/workflows/ci.yml</code>.</p>
+</div></details>
+
+<h3>Failure-mode map</h3>
+<table>
+<tr><th>Failure</th><th>Boundary that handles it</th><th>Expected behavior</th></tr>
+<tr><td>Invalid SKU</td><td>Pydantic</td><td>422</td></tr>
+<tr><td>Missing auth</td><td>dependency/security layer</td><td>401</td></tr>
+<tr><td>Unauthorized operation</td><td>authorization</td><td>403</td></tr>
+<tr><td>Price absent</td><td>service/domain</td><td>404 or defined fallback</td></tr>
+<tr><td>Duplicate write</td><td>idempotency/business rule</td><td>consistent result / 409 where appropriate</td></tr>
+<tr><td>Upstream timeout</td><td>async timeout</td><td>503/fallback</td></tr>
+<tr><td>Redis outage</td><td>cache abstraction</td><td>fallback to source where safe</td></tr>
+<tr><td>SSE disconnect</td><td>stream generator</td><td>cancel model work</td></tr>
+<tr><td>Container unhealthy</td><td>healthcheck</td><td>orchestrator stops routing to it</td></tr>
+<tr><td>Failed tests</td><td>CI</td><td>no image promotion</td></tr>
+</table>
+
+<h3>Senior interview: architecture walkthrough</h3>
+<div class="callout interview">
+📌 <b>Question:</b> “Design this for 500 concurrent streaming users.”
+<ul>
+<li>Start with request validation and authentication.</li>
+<li>Give every upstream dependency a timeout.</li>
+<li>Use async clients for network I/O.</li>
+<li>Bound concurrent LLM requests with a semaphore or provider capacity.</li>
+<li>Use bounded queues for token buffering.</li>
+<li>Detect client disconnects and cancel upstream generation.</li>
+<li>Cache only data whose freshness policy is explicit.</li>
+<li>Instrument cache hit ratio, upstream latency, time-to-first-token, active streams and error rate.</li>
+<li>Keep Redis failure separate from source-of-truth failure.</li>
+<li>Build immutable images and promote the exact tested artifact.</li>
+</ul>
+</div>
+
+<h3>Three production-shaped snippets</h3>
+
+<div class="box">
+<h4>Scenario 1 — request-scoped correlation</h4>
+<pre><code>async def get_request_id(
+    request: Request
+):
+    value = request.headers.get("X-Request-ID")
+    return value or uuid.uuid4().hex
+
+@router.get("/price/{sku}")
+async def price(
+    sku: str,
+    request_id=Depends(get_request_id)
+):
+    logger.info(
+        "price_request",
+        extra={
+            "sku": sku,
+            "request_id": request_id
+        }
+    )
+    return await service.price(sku)</code></pre>
+<ul><li><b>Notice:</b> request ID travels through logs.</li><li><b>Scale failure:</b> incidents become a search through unrelated log lines.</li></ul>
+</div>
+
+<div class="box">
+<h4>Scenario 2 — graceful model cancellation</h4>
+<pre><code>async def stream(request):
+    task = asyncio.create_task(
+        llm.stream()
+    )
+    try:
+        while True:
+            if await request.is_disconnected():
+                task.cancel()
+                break
+
+            token = await task
+            yield token
+            task = asyncio.create_task(
+                llm.next_token()
+            )
+    finally:
+        task.cancel()</code></pre>
+<ul><li><b>Notice:</b> connection lifetime owns model work.</li><li><b>Scale failure:</b> disconnected browsers can continue consuming model capacity.</li></ul>
+</div>
+
+<div class="box">
+<h4>Scenario 3 — production health separation</h4>
+<pre><code>@app.get("/health/live")
+async def liveness():
+    return {"status":"alive"}
+
+@app.get("/health/ready")
+async def readiness():
+    if not app.state.redis_ready:
+        raise HTTPException(503, "not_ready")
+    return {"status":"ready"}</code></pre>
+<ul><li><b>Notice:</b> liveness asks “is the process alive?” readiness asks “should traffic be sent here?”</li><li><b>Scale failure:</b> one overloaded/unready instance may keep receiving traffic.</li></ul>
+</div>
+
+<h3>Final senior decision drills</h3>
+
+<div class="quiz">
+<b>Q1. Redis is down, but the upstream pricing API works. What should happen?</b>
+<br><button class="reveal">A) Always fail</button><button class="reveal">B) Treat Redis as optional cache and fall back where business semantics permit</button>
+<div class="answer">B. If Redis is not the source of truth, its outage should not automatically become a pricing outage. The fallback must still respect upstream capacity.</div>
+</div>
+
+<div class="quiz">
+<b>Q2. An SSE client disconnects after receiving 20 tokens. What should happen to the model request?</b>
+<br><button class="reveal">A) keep generating forever</button><button class="reveal">B) cancel when the work is no longer needed</button>
+<div class="answer">B. Client disconnect is a capacity signal. Continuing expensive generation wastes compute and provider quota.</div>
+</div>
+
+<div class="quiz">
+<b>Q3. Tests pass, but Docker build fails. Should production deploy?</b>
+<br><button class="reveal">A) no</button><button class="reveal">B) yes</button>
+<div class="answer">A. The deployable artifact does not exist. CI should make artifact creation part of the gate before promotion.</div>
+</div>
+
+<h3>Interview-ready mental models</h3>
+<div class="grid">
+<div class="card"><b>REST</b><br>Resources + HTTP semantics + stateless contracts.</div>
+<div class="card"><b>Pydantic</b><br>Untrusted data → validated typed data.</div>
+<div class="card"><b>FastAPI</b><br>Routing + dependency graph + lifecycle + HTTP contract.</div>
+<div class="card"><b>Async</b><br>Overlap waits, then bound the work.</div>
+<div class="card"><b>SSE</b><br>Long-lived HTTP response + event framing + reconnect.</div>
+<div class="card"><b>Redis</b><br>Shared fast state with explicit freshness semantics.</div>
+<div class="card"><b>Docker</b><br>Reproducible runtime artifact.</div>
+<div class="card"><b>Compose</b><br>Reproducible local multi-service system.</div>
+<div class="card"><b>CI/CD</b><br>Source → verified artifact → authorized promotion.</div>
+</div>
+
+<div class="callout senior">
+🎯 <b>Final senior habit:</b> whenever you design a system, ask five questions:
+<ol>
+<li>What is the boundary?</li>
+<li>What can block?</li>
+<li>What can fail?</li>
+<li>What is the capacity limit?</li>
+<li>How will I observe and recover it?</li>
+</ol>
+</div>
+
+<div class="callout"><span class="chip take">Takeaway: senior backend engineering is controlled composition of contracts, concurrency, state, streaming, runtime and delivery.</span></div>
+<div class="callout"><span class="chip take">You can now do: explain and implement the complete FastAPI → async → SSE → Redis → Docker → Compose → CI/CD system and defend its production trade-offs in an interview.</span></div>
+</section>
+
+<footer>
+<p>Build each version yourself before opening the next one.</p>
+<p>The goal is not memorizing syntax. The goal is being able to explain why every boundary exists and what fails when it is removed.</p>
+</footer>
+
+</main>
+</div>
+
+<script>
+/* Copy every code block */
+document.querySelectorAll("pre").forEach(pre=>{
+  const btn=pre.querySelector(".copy");
+  if(!btn)return;
+  btn.addEventListener("click",async()=>{
+    const code=pre.querySelector("code");
+    try{
+      await navigator.clipboard.writeText(code.innerText);
+      btn.textContent="Copied";
+      setTimeout(()=>btn.textContent="Copy",1000);
+    }catch(e){
+      btn.textContent="Select manually";
+    }
+  });
+});
+
+/* Reveal answers */
+document.querySelectorAll(".reveal").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const parent=btn.closest(".quiz");
+    const answer=parent.querySelector(".answer");
+    if(answer)answer.classList.add("show");
+  });
+});
+
+/* Reading progress */
+function updateProgress(){
+  const root=document.documentElement;
+  const max=root.scrollHeight-window.innerHeight;
+  const pct=max>0?(window.scrollY/max)*100:0;
+  document.getElementById("progress").style.width=pct+"%";
+}
+window.addEventListener("scroll",updateProgress,{passive:true});
+updateProgress();
+
+/* Make details behave like a lightweight course */
+document.querySelectorAll("details").forEach(d=>{
+  d.addEventListener("toggle",()=>{
+    if(d.open)d.scrollIntoView({block:"nearest",behavior:"smooth"});
+  });
+});
+</script>
+</body>
+</html>
